@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "145330881660",
+    "project_id": "bookbus-cantho",
+    "storage_bucket": "bookbus-cantho.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145330881660:android:151d56ae27e25faa8e75f9",
+        "android_client_info": {
+          "package_name": "com.example.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANrTVByFMa3LBRHyUGH9nrnvm-cf9wG-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

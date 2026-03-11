@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cho phep doc/ghi neu dang dang nhap (co nguoiDungId hop le)
+    match /nguoi_dung/{docId} {
+      allow read, write: if true;
+    }
+    match /ve/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
