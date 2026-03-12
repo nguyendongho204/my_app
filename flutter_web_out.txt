@@ -1,0 +1,310 @@
+Launching lib\main.dart on Chrome in debug mode...
+Waiting for connection from debug service on Chrome...             12,3s
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+Debug service listening on ws://127.0.0.1:56382/d2SDkLI5VZk=/ws
+A Dart VM Service on Chrome is available at: http://127.0.0.1:56382/d2SDkLI5VZk=
+The Flutter DevTools debugger and profiler on Chrome is available at: http://127.0.0.1:56382/d2SDkLI5VZk=/devtools/?uri=ws://127.0.0.1:56382/d2SDkLI5VZk=/ws
+Starting application from main method in: org-dartlang-app:/web_entrypoint.dart.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Starting application from main method in: org-dartlang-app:/web_entrypoint.dart.
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+The following assertion was thrown building Positioned(left: 109.8, top: 60.0, width: 390.0, height:
+18.0):
+Failed to interpolate TextStyles with different inherit values.
+
+The TextStyles being interpolated were:
+from: TextStyle(inherit: true, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), size: 17.0, weight: 600)
+to: TextStyle(inherit: false, color: Color(alpha: 1.0000, red: 0.2588, green: 0.6471, blue: 0.9608, colorSpace: ColorSpace.sRGB), family: CupertinoSystemText, size: 17.0, letterSpacing: -0.4, decoration: TextDecoration.none)
+The following fields are unspecified in both TextStyles:
+"backgroundColor", "wordSpacing", "height", "decorationColor", "decorationThickness".
+When "inherit" changes during the transition, these fields may observe abrupt value changes as a
+result, causing "jump"s in the transition.
+
+In general, TextStyle.lerp only works well when both TextStyles have the same "inherit" value, and
+specify the same fields.
+If the TextStyles were directly created by you, consider bringing them to parity to ensure a smooth
+transition.
+
+If one of the TextStyles being lerped is significantly more elaborate than the other, and has
+"inherited" set to false, it is often because it is merged with another TextStyle before being
+lerped. Comparing the "debugLabel"s of the two TextStyles may help identify if that was the case.
+For example, you may see this error message when trying to lerp between "ThemeData()" and
+"Theme.of(context)". This is because TextStyles from "Theme.of(context)" are merged with TextStyles
+from another theme and thus are more elaborate than the TextStyles from "ThemeData()" (which is
+reflected in their "debugLabel"s -- TextStyles from "Theme.of(context)" should have labels in the
+form of "(<A TextStyle>).merge(<Another TextStyle>)"). It is recommended to only lerp ThemeData with
+matching TextStyles.
+
+The relevant error-causing widget was:
+  CupertinoApp CupertinoApp:file:///C:/Users/LEGION/my_app/lib/main.dart:50:18
+
+When the exception was thrown, this was the stack:
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 274:3        throw_
+package:flutter/src/painting/text_style.dart 1241:7                                <fn>
+package:flutter/src/painting/text_style.dart 1271:9                                lerp
+package:flutter/src/widgets/implicit_animations.dart 223:41                        lerp
+package:flutter/src/animation/tween.dart 369:12                                    transform
+package:flutter/src/animation/tween.dart 71:46                                     evaluate
+package:flutter/src/animation/tween.dart 123:31                                    get value
+package:flutter/src/animation/tween.dart 127:46                                    toString
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 1140:37  _toString
+package:flutter/src/foundation/diagnostics.dart 2711:60                            valueToString
+package:flutter/src/foundation/diagnostics.dart 2728:21                            toDescription
+package:flutter/src/foundation/diagnostics.dart 1213:30                            [_debugRender]
+package:flutter/src/foundation/diagnostics.dart 1137:14                            render
+package:flutter/src/foundation/diagnostics.dart 1328:39                            [_debugRender]
+package:flutter/src/foundation/diagnostics.dart 1137:14                            render
+package:flutter/src/foundation/diagnostics.dart 1818:73                            <fn>
+package:flutter/src/foundation/diagnostics.dart 1824:14                            toStringDeep
+package:flutter/src/foundation/diagnostics.dart 1745:18                            <fn>
+package:flutter/src/foundation/diagnostics.dart 1757:14                            toString
+package:flutter/src/foundation/diagnostics.dart 3102:37                            <fn>
+package:flutter/src/foundation/diagnostics.dart 3104:14                            toString
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 1182:45  str
+package:flutter/src/widgets/framework.dart 5827:28                                 performRebuild
+package:flutter/src/widgets/framework.dart 5982:11                                 performRebuild
+package:flutter/src/widgets/framework.dart 5529:7                                  rebuild
+package:flutter/src/widgets/framework.dart 5799:5                                  [_firstBuild]
+package:flutter/src/widgets/framework.dart 5973:11                                 [_firstBuild]
+package:flutter/src/widgets/framework.dart 5793:5                                  mount
+...     Normal element mounting (21 frames)
+package:flutter/src/widgets/framework.dart 4587:19                                 inflateWidget
+package:flutter/src/widgets/framework.dart 7264:36                                 inflateWidget
+package:flutter/src/widgets/framework.dart 7279:32                                 mount
+...     Normal element mounting (76 frames)
+package:flutter/src/widgets/framework.dart 4587:19                                 inflateWidget
+package:flutter/src/widgets/framework.dart 7264:36                                 inflateWidget
+package:flutter/src/widgets/framework.dart 4059:18                                 updateChild
+package:flutter/src/widgets/framework.dart 4255:32                                 updateChildren
+package:flutter/src/widgets/framework.dart 7295:17                                 update
+package:flutter/src/widgets/framework.dart 4037:14                                 updateChild
+package:flutter/src/widgets/framework.dart 5841:16                                 performRebuild
+package:flutter/src/widgets/framework.dart 5982:11                                 performRebuild
+package:flutter/src/widgets/framework.dart 5529:7                                  rebuild
+package:flutter/src/widgets/framework.dart 2750:14                                 [_tryRebuild]
+package:flutter/src/widgets/framework.dart 2807:11                                 [_flushDirtyElements]
+package:flutter/src/widgets/framework.dart 3111:17                                 buildScope
+package:flutter/src/widgets/layout_builder.dart 270:5                              [_rebuildWithConstraints]
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77   tear
+package:flutter/src/widgets/layout_builder.dart 333:28                             layoutCallback
+package:flutter/src/rendering/object.dart 4162:33                                  <fn>
+package:flutter/src/rendering/object.dart 2887:9                                   <fn>
+package:flutter/src/rendering/object.dart 1223:7                                   [_enableMutationsToDirtySubtrees]
+package:flutter/src/rendering/object.dart 2886:7                                   invokeLayoutCallback
+package:flutter/src/rendering/object.dart 4162:5                                   runLayoutCallback
+package:flutter/src/widgets/layout_builder.dart 447:5                              performLayout
+package:flutter/src/rendering/object.dart 2768:7                                   layout
+package:flutter/src/rendering/proxy_box.dart 118:10                                <fn>
+package:flutter/src/rendering/proxy_box.dart 118:10                                performLayout
+package:flutter/src/rendering/object.dart 2768:7                                   layout
+package:flutter/src/rendering/proxy_box.dart 118:10                                <fn>
+package:flutter/src/rendering/proxy_box.dart 118:10                                performLayout
+package:flutter/src/rendering/object.dart 2768:7                                   layout
+package:flutter/src/rendering/layout_helper.dart 62:10                             layoutChild
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77   tear
+package:flutter/src/rendering/stack.dart 645:43                                    [_computeSize]
+package:flutter/src/rendering/stack.dart 680:12                                    performLayout
+package:flutter/src/rendering/object.dart 2616:7                                   [_layoutWithoutResize]
+package:flutter/src/rendering/object.dart 1174:17                                  flushLayout
+package:flutter/src/rendering/object.dart 1187:14                                  flushLayout
+package:flutter/src/rendering/binding.dart 629:5                                   drawFrame
+package:flutter/src/widgets/binding.dart 1304:13                                   drawFrame
+package:flutter/src/rendering/binding.dart 495:5                                   [_handlePersistentFrameCallback]
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77   tear
+package:flutter/src/scheduler/binding.dart 1430:7                                  [_invokeFrameCallback]
+package:flutter/src/scheduler/binding.dart 1345:9                                  handleDrawFrame
+package:flutter/src/scheduler/binding.dart 1198:5                                  [_handleDrawFrame]
+dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart 118:77   tear
+lib/_engine/engine/platform_dispatcher.dart 1689:5                                 invoke
+lib/_engine/engine/platform_dispatcher.dart 265:5                                  invokeOnDrawFrame
+lib/_engine/engine/frame_service.dart 209:32                                       [_renderFrame]
+lib/_engine/engine/frame_service.dart 117:9                                        <fn>
+dart-sdk/lib/async/zone.dart 962:54                                                runUnary
+dart-sdk/lib/async/zone.dart 917:26                                                <fn>
+dart-sdk/lib/_internal/js_dev_runtime/patch/js_allow_interop_patch.dart 224:27     _callDartFunctionFast1
+dart-sdk/lib/_internal/js_dev_runtime/patch/js_allow_interop_patch.dart 84:15      ret
+
+════════════════════════════════════════════════════════════════════════════════════════════════════
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.
+Another exception was thrown: Failed to interpolate TextStyles with different inherit values.

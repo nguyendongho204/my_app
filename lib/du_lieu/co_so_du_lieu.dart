@@ -12,6 +12,7 @@ class NguoiDung {
   final String email;
   final String matKhau;
   final String ngayTao;
+  final bool biKhoa;
 
   const NguoiDung({
     this.id,
@@ -20,17 +21,18 @@ class NguoiDung {
     required this.email,
     required this.matKhau,
     required this.ngayTao,
+    this.biKhoa = false,
   });
 
   NguoiDung copyWith({String? id}) => NguoiDung(
         id: id ?? this.id,
         ten: ten, sdt: sdt, email: email,
-        matKhau: matKhau, ngayTao: ngayTao,
+        matKhau: matKhau, ngayTao: ngayTao, biKhoa: biKhoa,
       );
 
   Map<String, dynamic> toMap() => {
         'ten': ten, 'sdt': sdt, 'email': email,
-        'matKhau': matKhau, 'ngayTao': ngayTao,
+        'matKhau': matKhau, 'ngayTao': ngayTao, 'biKhoa': biKhoa,
       };
 
   factory NguoiDung.fromDoc(DocumentSnapshot doc) {
@@ -42,6 +44,7 @@ class NguoiDung {
       email: d['email'] ?? '',
       matKhau: d['matKhau'] ?? '',
       ngayTao: d['ngayTao'] ?? '',
+      biKhoa: d['biKhoa'] == true,
     );
   }
 }
@@ -108,6 +111,321 @@ class Ve {
   }
 }
 
+class NhanVien {
+  final String? id;
+  final String ten;
+  final String maNV;
+  final String matKhau;
+
+  const NhanVien({
+    this.id,
+    required this.ten,
+    required this.maNV,
+    required this.matKhau,
+  });
+
+  factory NhanVien.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return NhanVien(
+      id: doc.id,
+      ten: d['ten'] ?? '',
+      maNV: d['maNV'] ?? '',
+      matKhau: d['matKhau'] ?? '',
+    );
+  }
+}
+
+class Admin {
+  final String? id;
+  final String ten;
+  final String maTK;
+  final String matKhau;
+
+  const Admin({
+    this.id,
+    required this.ten,
+    required this.maTK,
+    required this.matKhau,
+  });
+
+  factory Admin.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return Admin(
+      id: doc.id,
+      ten: d['ten'] ?? '',
+      maTK: d['maTK'] ?? '',
+      matKhau: d['matKhau'] ?? '',
+    );
+  }
+}
+
+class TuyenXe {
+  final String? id;
+  final String diemDi;
+  final String diemDen;
+  final int khoangCach;
+  final int thoiGian;
+  final int giaVeCoSo;
+  final List<String> danhSachDiemDon;
+  final List<String> danhSachDiemTra;
+  final bool hoatDong;
+
+  const TuyenXe({
+    this.id,
+    required this.diemDi,
+    required this.diemDen,
+    required this.khoangCach,
+    required this.thoiGian,
+    required this.giaVeCoSo,
+    required this.danhSachDiemDon,
+    required this.danhSachDiemTra,
+    required this.hoatDong,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'diemDi': diemDi, 'diemDen': diemDen,
+        'khoangCach': khoangCach, 'thoiGian': thoiGian,
+        'giaVeCoSo': giaVeCoSo,
+        'danhSachDiemDon': danhSachDiemDon,
+        'danhSachDiemTra': danhSachDiemTra,
+        'hoatDong': hoatDong,
+      };
+
+  factory TuyenXe.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return TuyenXe(
+      id: doc.id,
+      diemDi: d['diemDi'] ?? '',
+      diemDen: d['diemDen'] ?? '',
+      khoangCach: (d['khoangCach'] as num?)?.toInt() ?? 0,
+      thoiGian: (d['thoiGian'] as num?)?.toInt() ?? 0,
+      giaVeCoSo: (d['giaVeCoSo'] as num?)?.toInt() ?? 0,
+      danhSachDiemDon: List<String>.from(d['danhSachDiemDon'] ?? []),
+      danhSachDiemTra: List<String>.from(d['danhSachDiemTra'] ?? []),
+      hoatDong: d['hoatDong'] ?? true,
+    );
+  }
+}
+
+class LichChay {
+  final String? id;
+  final String tuyenId;
+  final String diemDi;
+  final String diemDen;
+  final String ngay;
+  final String gio;
+  final String loaiXe;
+  final int soGheToiDa;
+  final int soGheConLai;
+  final String trangThai;
+
+  const LichChay({
+    this.id,
+    required this.tuyenId,
+    required this.diemDi,
+    required this.diemDen,
+    required this.ngay,
+    required this.gio,
+    required this.loaiXe,
+    required this.soGheToiDa,
+    required this.soGheConLai,
+    required this.trangThai,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'tuyenId': tuyenId, 'diemDi': diemDi, 'diemDen': diemDen,
+        'ngay': ngay, 'gio': gio, 'loaiXe': loaiXe,
+        'soGheToiDa': soGheToiDa, 'soGheConLai': soGheConLai,
+        'trangThai': trangThai,
+      };
+
+  factory LichChay.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return LichChay(
+      id: doc.id,
+      tuyenId: d['tuyenId'] ?? '',
+      diemDi: d['diemDi'] ?? '',
+      diemDen: d['diemDen'] ?? '',
+      ngay: d['ngay'] ?? '',
+      gio: d['gio'] ?? '',
+      loaiXe: d['loaiXe'] ?? '',
+      soGheToiDa: (d['soGheToiDa'] as num?)?.toInt() ?? 0,
+      soGheConLai: (d['soGheConLai'] as num?)?.toInt() ?? 0,
+      trangThai: d['trangThai'] ?? 'cho',
+    );
+  }
+}
+
+class Xe {
+  final String? id;
+  final String bienSo;
+  final String loaiXe;
+  final int soGhe;
+  final String trangThai;
+
+  const Xe({
+    this.id,
+    required this.bienSo,
+    required this.loaiXe,
+    required this.soGhe,
+    required this.trangThai,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'bienSo': bienSo, 'loaiXe': loaiXe,
+        'soGhe': soGhe, 'trangThai': trangThai,
+      };
+
+  factory Xe.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return Xe(
+      id: doc.id,
+      bienSo: d['bienSo'] ?? '',
+      loaiXe: d['loaiXe'] ?? '',
+      soGhe: (d['soGhe'] as num?)?.toInt() ?? 0,
+      trangThai: d['trangThai'] ?? 'san_sang',
+    );
+  }
+}
+
+class TaiXe {
+  final String? id;
+  final String ten;
+  final String sdt;
+  final String soGPLX;
+  final String ngaySinh;
+  final String trangThai;
+
+  const TaiXe({
+    this.id,
+    required this.ten,
+    required this.sdt,
+    required this.soGPLX,
+    required this.ngaySinh,
+    required this.trangThai,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'ten': ten, 'sdt': sdt,
+        'soGPLX': soGPLX, 'ngaySinh': ngaySinh,
+        'trangThai': trangThai,
+      };
+
+  factory TaiXe.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return TaiXe(
+      id: doc.id,
+      ten: d['ten'] ?? '',
+      sdt: d['sdt'] ?? '',
+      soGPLX: d['soGPLX'] ?? '',
+      ngaySinh: d['ngaySinh'] ?? '',
+      trangThai: d['trangThai'] ?? 'san_sang',
+    );
+  }
+}
+
+class KhuyenMai {
+  final String? id;
+  final String ma;
+  final String ten;
+  final String loaiGiam;
+  final int giaTriGiam;
+  final int giaTriToiDa;
+  final String ngayBatDau;
+  final String ngayKetThuc;
+  final int gioiHanSuDung;
+  final int daSuDung;
+  final String trangThai;
+
+  const KhuyenMai({
+    this.id,
+    required this.ma,
+    required this.ten,
+    required this.loaiGiam,
+    required this.giaTriGiam,
+    required this.giaTriToiDa,
+    required this.ngayBatDau,
+    required this.ngayKetThuc,
+    required this.gioiHanSuDung,
+    required this.daSuDung,
+    required this.trangThai,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'ma': ma, 'ten': ten, 'loaiGiam': loaiGiam,
+        'giaTriGiam': giaTriGiam, 'giaTriToiDa': giaTriToiDa,
+        'ngayBatDau': ngayBatDau, 'ngayKetThuc': ngayKetThuc,
+        'gioiHanSuDung': gioiHanSuDung, 'daSuDung': daSuDung,
+        'trangThai': trangThai,
+      };
+
+  factory KhuyenMai.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return KhuyenMai(
+      id: doc.id,
+      ma: d['ma'] ?? '',
+      ten: d['ten'] ?? '',
+      loaiGiam: d['loaiGiam'] ?? 'phan_tram',
+      giaTriGiam: (d['giaTriGiam'] as num?)?.toInt() ?? 0,
+      giaTriToiDa: (d['giaTriToiDa'] as num?)?.toInt() ?? 0,
+      ngayBatDau: d['ngayBatDau'] ?? '',
+      ngayKetThuc: d['ngayKetThuc'] ?? '',
+      gioiHanSuDung: (d['gioiHanSuDung'] as num?)?.toInt() ?? 0,
+      daSuDung: (d['daSuDung'] as num?)?.toInt() ?? 0,
+      trangThai: d['trangThai'] ?? 'hoat_dong',
+    );
+  }
+}
+
+class KhieuNai {
+  final String? id;
+  final String userId;
+  final String tenKhachHang;
+  final String tieuDe;
+  final String noiDung;
+  final String maVe;
+  final String trangThai;
+  final String ngayTao;
+  final String phanHoi;
+  final String ngayPhanHoi;
+
+  const KhieuNai({
+    this.id,
+    required this.userId,
+    required this.tenKhachHang,
+    required this.tieuDe,
+    required this.noiDung,
+    required this.maVe,
+    required this.trangThai,
+    required this.ngayTao,
+    required this.phanHoi,
+    required this.ngayPhanHoi,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId, 'tenKhachHang': tenKhachHang,
+        'tieuDe': tieuDe, 'noiDung': noiDung, 'maVe': maVe,
+        'trangThai': trangThai, 'ngayTao': ngayTao,
+        'phanHoi': phanHoi, 'ngayPhanHoi': ngayPhanHoi,
+      };
+
+  factory KhieuNai.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return KhieuNai(
+      id: doc.id,
+      userId: d['userId'] ?? '',
+      tenKhachHang: d['tenKhachHang'] ?? '',
+      tieuDe: d['tieuDe'] ?? '',
+      noiDung: d['noiDung'] ?? '',
+      maVe: d['maVe'] ?? '',
+      trangThai: d['trangThai'] ?? 'cho_xu_ly',
+      ngayTao: d['ngayTao'] ?? '',
+      phanHoi: d['phanHoi'] ?? '',
+      ngayPhanHoi: d['ngayPhanHoi'] ?? '',
+    );
+  }
+}
+
 // ===================== DATABASE HELPER =====================
 
 class CoSoDuLieu {
@@ -118,6 +436,16 @@ class CoSoDuLieu {
   final _db = FirebaseFirestore.instance;
   CollectionReference get _nguoiDung => _db.collection('nguoi_dung');
   CollectionReference get _ve => _db.collection('ve');
+  CollectionReference get _nhanVien => _db.collection('nhan_vien');
+  CollectionReference get _lichSuSoat => _db.collection('lich_su_soat');
+  CollectionReference get _admin => _db.collection('admin');
+  CollectionReference get _tuyenXe => _db.collection('tuyen_xe');
+  CollectionReference get _lichChay => _db.collection('lich_chay');
+  CollectionReference get _xe => _db.collection('xe');
+  CollectionReference get _taiXe => _db.collection('tai_xe');
+  CollectionReference get _khuyenMai => _db.collection('khuyen_mai');
+  CollectionReference get _khieuNai => _db.collection('khieu_nai');
+  CollectionReference get _cauHinh => _db.collection('cau_hinh');
 
   // ---------- TIEN ICH ----------
   static String hashMatKhau(String mk) =>
@@ -274,6 +602,273 @@ class CoSoDuLieu {
   Future<void> luuDanhGia(String veId, int sao) async {
     await _ve.doc(veId).update({'danhGia': sao});
   }
+
+  // ---------- NHAN VIEN ----------
+
+  Future<NhanVien?> dangNhapNhanVien({
+    required String maNV,
+    required String matKhau,
+  }) async {
+    final hash = hashMatKhau(matKhau);
+    final q = await _nhanVien.where('maNV', isEqualTo: maNV).get();
+    if (q.docs.isEmpty) return null;
+    final doc = q.docs.first;
+    final data = doc.data() as Map<String, dynamic>;
+    if (data['matKhau'] != hash) return null;
+    return NhanVien.fromDoc(doc);
+  }
+
+  Future<void> taoNhanVien({
+    required String ten,
+    required String maNV,
+    required String matKhau,
+  }) async {
+    final q = await _nhanVien.where('maNV', isEqualTo: maNV).get();
+    if (q.docs.isNotEmpty) return;
+    await _nhanVien.add({
+      'ten': ten,
+      'maNV': maNV,
+      'matKhau': hashMatKhau(matKhau),
+    });
+  }
+
+  Future<Ve?> timVeTheoMaVe(String maVe) async {
+    final q = await _ve.where('maVe', isEqualTo: maVe).get();
+    if (q.docs.isEmpty) return null;
+    return Ve.fromDoc(q.docs.first);
+  }
+
+  Future<void> luuLichSuSoat(String maNV, Ve ve, String ghiChu) async {
+    await _lichSuSoat.add({
+      'maNV': maNV,
+      'maVe': ve.maVe,
+      'diemDi': ve.diemDi,
+      'diemDen': ve.diemDen,
+      'ngay': ve.ngay,
+      'gio': ve.gio,
+      'danhSachGhe': ve.danhSachGhe,
+      'loaiXe': ve.loaiXe,
+      'ghiChu': ghiChu,
+      'thoiGian': DateTime.now().toIso8601String(),
+      'ngayLuu': '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> layLichSuSoat(String maNV) async {
+    final n = DateTime.now();
+    final today = '${n.day}/${n.month}/${n.year}';
+    final q = await _lichSuSoat.where('maNV', isEqualTo: maNV).get();
+    final list = q.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .where((d) => d['ngayLuu'] == today)
+        .toList();
+    list.sort((a, b) {
+      final ta = (a['thoiGian'] ?? '').toString();
+      final tb = (b['thoiGian'] ?? '').toString();
+      return tb.compareTo(ta);
+    });
+    return list;
+  }
+
+  // ---------- ADMIN ----------
+
+  Future<Admin?> dangNhapAdmin({
+    required String maTK,
+    required String matKhau,
+  }) async {
+    final hash = hashMatKhau(matKhau);
+    final q = await _admin.where('maTK', isEqualTo: maTK).get();
+    if (q.docs.isEmpty) return null;
+    final doc = q.docs.first;
+    final data = doc.data() as Map<String, dynamic>;
+    if (data['matKhau'] != hash) return null;
+    return Admin.fromDoc(doc);
+  }
+
+  Future<void> taoAdmin({
+    required String ten,
+    required String maTK,
+    required String matKhau,
+  }) async {
+    final q = await _admin.where('maTK', isEqualTo: maTK).get();
+    if (q.docs.isNotEmpty) return;
+    await _admin.add({
+      'ten': ten,
+      'maTK': maTK,
+      'matKhau': hashMatKhau(matKhau),
+    });
+  }
+
+  Future<List<Admin>> layTatCaAdmin() async {
+    final q = await _admin.get();
+    return q.docs.map((d) => Admin.fromDoc(d)).toList();
+  }
+
+  Future<List<Ve>> layTatCaVe({String? ngay}) async {
+    Query q = _ve;
+    if (ngay != null) q = q.where('ngay', isEqualTo: ngay);
+    final snap = await q.get();
+    final list = snap.docs.map((d) => Ve.fromDoc(d)).toList();
+    list.sort((a, b) => b.ngayDat.compareTo(a.ngayDat));
+    return list;
+  }
+
+  Future<List<NhanVien>> layTatCaNhanVien() async {
+    final q = await _nhanVien.get();
+    return q.docs.map((d) => NhanVien.fromDoc(d)).toList();
+  }
+
+  Future<void> xoaNhanVien(String id) async {
+    await _nhanVien.doc(id).delete();
+  }
+
+  Future<List<Map<String, dynamic>>> layLichSuSoatTatCa(
+      {String? ngay}) async {
+    final n = DateTime.now();
+    final today = ngay ?? '${n.day}/${n.month}/${n.year}';
+    final q =
+        await _lichSuSoat.where('ngayLuu', isEqualTo: today).get();
+    final list =
+        q.docs.map((d) => d.data() as Map<String, dynamic>).toList();
+    list.sort((a, b) {
+      final ta = (a['thoiGian'] ?? '').toString();
+      final tb = (b['thoiGian'] ?? '').toString();
+      return tb.compareTo(ta);
+    });
+    return list;
+  }
+
+  // ---------- TUYEN XE ----------
+
+  Future<List<TuyenXe>> layTatCaTuyen() async {
+    final q = await _tuyenXe.get();
+    return q.docs.map((d) => TuyenXe.fromDoc(d)).toList();
+  }
+
+  Future<void> taoTuyen(TuyenXe tuyen) async =>
+      _tuyenXe.add(tuyen.toMap());
+
+  Future<void> capNhatTuyen(String id, TuyenXe tuyen) async =>
+      _tuyenXe.doc(id).update(tuyen.toMap());
+
+  Future<void> xoaTuyen(String id) async =>
+      _tuyenXe.doc(id).delete();
+
+  // ---------- LICH CHAY ----------
+
+  Future<List<LichChay>> layLichChay(
+      {String? tuyenId, String? ngay}) async {
+    Query q = _lichChay;
+    if (tuyenId != null) q = q.where('tuyenId', isEqualTo: tuyenId);
+    if (ngay != null) q = q.where('ngay', isEqualTo: ngay);
+    final snap = await q.get();
+    return snap.docs.map((d) => LichChay.fromDoc(d)).toList();
+  }
+
+  Future<void> taoLichChay(LichChay lich) async =>
+      _lichChay.add(lich.toMap());
+
+  Future<void> capNhatLichChay(String id, Map<String, dynamic> data) async =>
+      _lichChay.doc(id).update(data);
+
+  Future<void> xoaLichChay(String id) async =>
+      _lichChay.doc(id).delete();
+
+  // ---------- XE ----------
+
+  Future<List<Xe>> layTatCaXe() async {
+    final q = await _xe.get();
+    return q.docs.map((d) => Xe.fromDoc(d)).toList();
+  }
+
+  Future<void> taoXe(Xe xe) async => _xe.add(xe.toMap());
+
+  Future<void> capNhatXe(String id, Map<String, dynamic> data) async =>
+      _xe.doc(id).update(data);
+
+  Future<void> xoaXe(String id) async => _xe.doc(id).delete();
+
+  // ---------- TAI XE ----------
+
+  Future<List<TaiXe>> layTatCaTaiXe() async {
+    final q = await _taiXe.get();
+    return q.docs.map((d) => TaiXe.fromDoc(d)).toList();
+  }
+
+  Future<void> taoTaiXe(TaiXe tx) async => _taiXe.add(tx.toMap());
+
+  Future<void> capNhatTaiXe(String id, Map<String, dynamic> data) async =>
+      _taiXe.doc(id).update(data);
+
+  Future<void> xoaTaiXe(String id) async => _taiXe.doc(id).delete();
+
+  // ---------- KHUYEN MAI ----------
+
+  Future<List<KhuyenMai>> layTatCaKhuyenMai() async {
+    final q = await _khuyenMai.get();
+    return q.docs.map((d) => KhuyenMai.fromDoc(d)).toList();
+  }
+
+  Future<void> taoKhuyenMai(KhuyenMai km) async =>
+      _khuyenMai.add(km.toMap());
+
+  Future<void> capNhatTrangThaiKhuyenMai(
+          String id, String trangThai) async =>
+      _khuyenMai.doc(id).update({'trangThai': trangThai});
+
+  Future<void> xoaKhuyenMai(String id) async =>
+      _khuyenMai.doc(id).delete();
+
+  // ---------- KHIEU NAI ----------
+
+  Future<List<KhieuNai>> layTatCaKhieuNai() async {
+    final q = await _khieuNai.get();
+    final list = q.docs.map((d) => KhieuNai.fromDoc(d)).toList();
+    list.sort((a, b) => b.ngayTao.compareTo(a.ngayTao));
+    return list;
+  }
+
+  Future<void> guiKhieuNai(KhieuNai kn) async =>
+      _khieuNai.add(kn.toMap());
+
+  Future<void> phanHoiKhieuNai(String id, String phanHoi) async {
+    final now = DateTime.now();
+    await _khieuNai.doc(id).update({
+      'phanHoi': phanHoi,
+      'trangThai': 'da_xu_ly',
+      'ngayPhanHoi': '${now.day}/${now.month}/${now.year}',
+    });
+  }
+
+  Future<void> capNhatTrangThaiKhieuNai(
+          String id, String trangThai) async =>
+      _khieuNai.doc(id).update({'trangThai': trangThai});
+
+  // ---------- NGUOI DUNG ADMIN ----------
+
+  Future<List<NguoiDung>> layTatCaNguoiDung() async {
+    final q = await _nguoiDung.get();
+    return q.docs.map((d) => NguoiDung.fromDoc(d)).toList();
+  }
+
+  Future<void> khoaTaiKhoan(String id, bool khoa) async =>
+      _nguoiDung.doc(id).update({'biKhoa': khoa});
+
+  // ---------- VE ADMIN ----------
+
+  Future<void> capNhatTrangThaiVe(String id, String trangThai) async =>
+      _ve.doc(id).update({'trangThai': trangThai});
+
+  // ---------- CAU HINH ----------
+
+  Future<Map<String, dynamic>> layCauHinh() async {
+    final doc = await _cauHinh.doc('cai_dat').get();
+    if (!doc.exists) return {};
+    return doc.data() as Map<String, dynamic>;
+  }
+
+  Future<void> capNhatCauHinh(Map<String, dynamic> data) async =>
+      _cauHinh.doc('cai_dat').set(data, SetOptions(merge: true));
 }
 
 // ===================== SESSION =====================

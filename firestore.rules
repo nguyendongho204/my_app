@@ -8,5 +8,35 @@ service cloud.firestore {
     match /ve/{docId} {
       allow read, write: if true;
     }
+    match /nhan_vien/{docId} {
+      allow read, write: if true;
+    }
+    match /lich_su_soat/{docId} {
+      allow read, write: if true;
+    }
+    match /admin/{docId} {
+      allow read, write: if true;
+    }
+    match /tuyen_xe/{docId} {
+      allow read, write: if true;
+    }
+    match /lich_chay/{docId} {
+      allow read, write: if true;
+    }
+    match /xe/{docId} {
+      allow read, write: if true;
+    }
+    match /tai_xe/{docId} {
+      allow read, write: if true;
+    }
+    match /khuyen_mai/{docId} {
+      allow read, write: if true;
+    }
+    match /khieu_nai/{docId} {
+      allow read, write: if true;
+    }
+    match /cau_hinh/{docId} {
+      allow read, write: if true;
+    }
   }
 }

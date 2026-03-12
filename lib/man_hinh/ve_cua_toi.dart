@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/cupertino.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../cau_hinh/hang_so.dart';
 import '../du_lieu/co_so_du_lieu.dart';
 import '../widget_dung_chung/cac_widget.dart';
@@ -55,40 +56,6 @@ class _VeCuaToiState extends State<VeCuaToi> {
   }
 
   /// True nếu chàyến trong cửa sổ -15 phút đến +4 giờ so với giờ khởi hành
-  bool _laGanKhoiHanh(Ve ve) {
-    final kh = CoSoDuLieu.parseGioKhoiHanh(ve.ngay, ve.gio);
-    if (kh == null) return false;
-    final now = DateTime.now();
-    return now.isAfter(kh.subtract(const Duration(minutes: 15))) &&
-        now.isBefore(kh.add(const Duration(hours: 4)));
-  }
-
-  void _lenXe(Ve ve) {
-    showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-        title: const Text('Xác nhận lên xe?'),
-        content: Text(
-            'Bạn xác nhận đã lên xe\n${ve.diemDi} → ${ve.diemDen} lúc ${ve.gio}?'),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-            child: const Text('Huỷ'),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-              TrangThaiUngDung().lenXeLocal(ve.id!);
-              await CoSoDuLieu().lenXe(ve.id!);
-            },
-            child: const Text('Đã lên xe ✓'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _xemChiTiet(Ve ve) {
     final mauTrangThai = ve.trangThai == 'cho'
         ? mauCam
@@ -104,8 +71,6 @@ class _VeCuaToiState extends State<VeCuaToi> {
             : ve.trangThai == 'bo_lo'
                 ? 'Bỏ lỡ'
                 : 'Đã hủy';
-    final ganKhoiHanh = _laGanKhoiHanh(ve);
-
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -230,39 +195,6 @@ class _VeCuaToiState extends State<VeCuaToi> {
               ),
               if (ve.trangThai == 'cho') ...[
                 const SizedBox(height: 16),
-                if (ganKhoiHanh) ...[
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      _lenXe(ve);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00C853), Color(0xFF1B5E20)],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(CupertinoIcons.checkmark_circle_fill,
-                              color: CupertinoColors.white, size: 20),
-                          SizedBox(width: 8),
-                          Text('Xác nhận lên xe ✓',
-                              style: TextStyle(
-                                  color: CupertinoColors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
                 Row(children: [
                   Expanded(
                     child: CupertinoButton(
@@ -446,17 +378,15 @@ class _VeCuaToiState extends State<VeCuaToi> {
               Container(
                 width: 180, height: 180,
                 decoration: BoxDecoration(
-                  color: mauNenToi,
+                  color: CupertinoColors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: mauXanhChinh.withAlpha(128)),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.qrcode, color: mauTextTrang, size: 100),
-                    SizedBox(height: 8),
-                    Text('Mã QR', style: TextStyle(color: mauTextXam, fontSize: 12)),
-                  ],
+                padding: const EdgeInsets.all(8),
+                child: QrImageView(
+                  data: ve.maVe,
+                  version: QrVersions.auto,
+                  size: 164,
+                  backgroundColor: CupertinoColors.white,
                 ),
               ),
               const SizedBox(height: 16),
@@ -768,9 +698,7 @@ class _VeCuaToiState extends State<VeCuaToi> {
                         onHuy: () => _huyVe(_veHienThi[i]),
                         onChiaSe: () => _chiaSeVe(_veHienThi[i]),
                         onDanhGia: () => _danhGiaVe(_veHienThi[i]),
-                        onLenXe: _laGanKhoiHanh(_veHienThi[i])
-                            ? () => _lenXe(_veHienThi[i])
-                            : null,
+
                       ),
                     ),
                     childCount: _veHienThi.length,
@@ -791,15 +719,12 @@ class _CardVe extends StatelessWidget {
   final VoidCallback onHuy;
   final VoidCallback? onChiaSe;
   final VoidCallback? onDanhGia;
-  final VoidCallback? onLenXe;
-
   const _CardVe({
     required this.ve,
     required this.onXemQR,
     required this.onHuy,
     this.onChiaSe,
     this.onDanhGia,
-    this.onLenXe,
   });
 
   Color get _mauTrangThai {
@@ -929,35 +854,6 @@ class _CardVe extends StatelessWidget {
                 ),
                 if (ve.trangThai == 'cho') ...[
                   const SizedBox(height: 12),
-                  if (onLenXe != null) ...[
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: onLenXe,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 11),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF00C853), Color(0xFF1B5E20)],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(CupertinoIcons.checkmark_circle_fill,
-                                color: CupertinoColors.white, size: 17),
-                            SizedBox(width: 8),
-                            Text('Xác nhận lên xe ✓',
-                                style: TextStyle(
-                                    color: CupertinoColors.white,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
                   Row(children: [
                     Expanded(
                       child: CupertinoButton(

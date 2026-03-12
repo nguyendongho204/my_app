@@ -100,8 +100,8 @@ class _ThanhToanState extends State<ThanhToan> {
           ngayDat: CoSoDuLieu.dinhDangNgayHienTai(),
           nguoiDungId: TrangThaiUngDung().nguoiDungHienTai!.id!,
         );
-        await db.datVe(ve);
-        TrangThaiUngDung().themVeLocal(ve);
+        final veDaLuu = await db.datVe(ve);
+        TrangThaiUngDung().themVeLocal(veDaLuu);
       } catch (_) {}
     }
 

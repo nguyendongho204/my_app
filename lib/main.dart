@@ -12,10 +12,28 @@ Future<void> _taoTaiKhoanTest() async {
   }
 }
 
+Future<void> _taoTaiKhoanNhanVien() async {
+  await CoSoDuLieu().taoNhanVien(
+    ten: 'Nhân viên soát vé',
+    maNV: 'nv01',
+    matKhau: 'dongho123',
+  );
+}
+
+Future<void> _taoTaiKhoanAdmin() async {
+  await CoSoDuLieu().taoAdmin(
+    ten: 'Quản trị viên',
+    maTK: 'admin',
+    matKhau: 'admin123',
+  );
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await _taoTaiKhoanTest();
+  await _taoTaiKhoanNhanVien();
+  await _taoTaiKhoanAdmin();
   runApp(
     DevicePreview(
       enabled: true,

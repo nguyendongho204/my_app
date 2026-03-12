@@ -3,6 +3,8 @@ import '../cau_hinh/hang_so.dart';
 import '../du_lieu/co_so_du_lieu.dart';
 import '../widget_dung_chung/cac_widget.dart';
 import 'dang_nhap.dart';
+import 'dang_nhap_nhan_vien.dart';
+import 'dang_nhap_admin.dart';
 
 class TaiKhoan extends StatefulWidget {
   const TaiKhoan({super.key});
@@ -589,6 +591,31 @@ class _TaiKhoanState extends State<TaiKhoan> {
                                 builder: (_) => const DangNhap(laModal: true)),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () =>
+                              Navigator.of(context, rootNavigator: true).push(
+                            CupertinoPageRoute(
+                                builder: (_) => const DangNhapNhanVien()),
+                          ),
+                          child: const Text(
+                            'Nhân viên soát vé? Đăng nhập tại đây →',
+                            style: TextStyle(color: mauTextXam, fontSize: 13),
+                          ),
+                        ),
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () =>
+                              Navigator.of(context, rootNavigator: true).push(
+                            CupertinoPageRoute(
+                                builder: (_) => const DangNhapAdmin()),
+                          ),
+                          child: const Text(
+                            'Quản trị viên →',
+                            style: TextStyle(color: mauTextXamNhat, fontSize: 12),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -727,6 +754,28 @@ class _TaiKhoanState extends State<TaiKhoan> {
                     const SizedBox(height: 10),
                     const Text('BookBus Cần Thơ v1.0.0',
                         style: TextStyle(color: mauTextXamNhat, fontSize: 12)),
+                    const SizedBox(height: 6),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(context, rootNavigator: true).push(
+                        CupertinoPageRoute(
+                            builder: (_) => const DangNhapNhanVien()),
+                      ),
+                      child: const Text(
+                        'Nhân viên soát vé? Đăng nhập tại đây →',
+                        style: TextStyle(color: mauTextXamNhat, fontSize: 12),
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(context, rootNavigator: true).push(
+                        CupertinoPageRoute(builder: (_) => const DangNhapAdmin()),
+                      ),
+                      child: const Text(
+                        'Quản trị viên →',
+                        style: TextStyle(color: mauTextXamNhat, fontSize: 12),
+                      ),
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),
