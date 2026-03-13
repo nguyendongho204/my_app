@@ -32,6 +32,94 @@ class _QuanLiXeState extends State<QuanLiXe> {
     }
   }
 
+  void _sua(Xe x) {
+    final bienSoCtrl = TextEditingController(text: x.bienSo);
+    final soGheCtrl = TextEditingController(text: x.soGhe.toString());
+    String loaiXe = x.loaiXe;
+    String? loi;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (_, setM) => Container(
+          decoration: const BoxDecoration(
+            color: mauCardNen,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: mauCardVien,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const Row(children: [
+                  Icon(CupertinoIcons.pencil, color: mauXanhSang, size: 20),
+                  SizedBox(width: 8),
+                  Text('Sửa thông tin xe',
+                      style: TextStyle(
+                          color: mauTextTrang, fontSize: 17,
+                          fontWeight: FontWeight.bold)),
+                ]),
+                const SizedBox(height: 16),
+                _F(ctrl: bienSoCtrl, ph: 'Biển số xe'),
+                const SizedBox(height: 10),
+                _F(ctrl: soGheCtrl, ph: 'Số ghế', kb: TextInputType.number),
+                const SizedBox(height: 10),
+                CupertinoSlidingSegmentedControl<String>(
+                  groupValue: loaiXe,
+                  backgroundColor: mauNenToi,
+                  children: const {
+                    'Ghế thường': Text('Ghế thường', style: TextStyle(fontSize: 11)),
+                    'Giường nằm': Text('Giường nằm', style: TextStyle(fontSize: 11)),
+                    'Limousine': Text('Limousine', style: TextStyle(fontSize: 11)),
+                  },
+                  onValueChanged: (v) { if (v != null) setM(() => loaiXe = v); },
+                ),
+                if (loi != null) ...[
+                  const SizedBox(height: 8),
+                  Text(loi!, style: const TextStyle(color: mauDoHong, fontSize: 12)),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton.filled(
+                    onPressed: () async {
+                      final bs = bienSoCtrl.text.trim();
+                      final sg = int.tryParse(soGheCtrl.text.trim()) ?? 0;
+                      if (bs.isEmpty || sg == 0) {
+                        setM(() => loi = 'Vui lòng nhập đầy đủ');
+                        return;
+                      }
+                      Navigator.of(context, rootNavigator: true).pop();
+                      await CoSoDuLieu().capNhatXe(x.id!, {
+                        'bienSo': bs, 'loaiXe': loaiXe, 'soGhe': sg,
+                      });
+                      _tai();
+                    },
+                    child: const Text('Lưu'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _them() {
     final bienSoCtrl = TextEditingController();
     final soGheCtrl = TextEditingController();
@@ -243,11 +331,16 @@ class _QuanLiXeState extends State<QuanLiXe> {
                           ),
                           CupertinoButton(
                             padding: EdgeInsets.zero,
+                            onPressed: () => _sua(x),
+                            child: const Icon(CupertinoIcons.pencil,
+                                color: mauXanhSang, size: 20),
+                          ),
+                          const SizedBox(width: 4),
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
                             onPressed: () async {
                               await CoSoDuLieu().capNhatXe(x.id!, {
-                                'trangThai': ok
-                                    ? 'bao_tri'
-                                    : 'san_sang'
+                                'trangThai': ok ? 'bao_tri' : 'san_sang'
                               });
                               _tai();
                             },

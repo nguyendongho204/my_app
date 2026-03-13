@@ -32,6 +32,90 @@ class _QuanLiTaiXeState extends State<QuanLiTaiXe> {
     }
   }
 
+  void _sua(TaiXe tx) {
+    final tenCtrl = TextEditingController(text: tx.ten);
+    final sdtCtrl = TextEditingController(text: tx.sdt);
+    final gplxCtrl = TextEditingController(text: tx.soGPLX);
+    final nsCtrl = TextEditingController(text: tx.ngaySinh);
+    String? loi;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (_, setM) => Container(
+          decoration: const BoxDecoration(
+            color: mauCardNen,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: mauCardVien,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const Row(children: [
+                  Icon(CupertinoIcons.pencil, color: mauXanhSang, size: 20),
+                  SizedBox(width: 8),
+                  Text('Sửa hồ sơ tài xế',
+                      style: TextStyle(
+                          color: mauTextTrang, fontSize: 17,
+                          fontWeight: FontWeight.bold)),
+                ]),
+                const SizedBox(height: 16),
+                _Fld(ctrl: tenCtrl, ph: 'Họ và tên'),
+                const SizedBox(height: 10),
+                _Fld(ctrl: sdtCtrl, ph: 'Số điện thoại', kb: TextInputType.phone),
+                const SizedBox(height: 10),
+                _Fld(ctrl: gplxCtrl, ph: 'Số GPLX'),
+                const SizedBox(height: 10),
+                _Fld(ctrl: nsCtrl, ph: 'Ngày sinh (d/m/yyyy)'),
+                if (loi != null) ...[
+                  const SizedBox(height: 8),
+                  Text(loi!, style: const TextStyle(color: mauDoHong, fontSize: 12)),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton.filled(
+                    onPressed: () async {
+                      final ten = tenCtrl.text.trim();
+                      final sdt = sdtCtrl.text.trim();
+                      final gplx = gplxCtrl.text.trim();
+                      if (ten.isEmpty || sdt.isEmpty || gplx.isEmpty) {
+                        setM(() => loi = 'Vui lòng nhập đầy đủ thông tin');
+                        return;
+                      }
+                      Navigator.of(context, rootNavigator: true).pop();
+                      await CoSoDuLieu().capNhatTaiXe(tx.id!, {
+                        'ten': ten, 'sdt': sdt,
+                        'soGPLX': gplx, 'ngaySinh': nsCtrl.text.trim(),
+                      });
+                      _tai();
+                    },
+                    child: const Text('Lưu'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _them() {
     final tenCtrl = TextEditingController();
     final sdtCtrl = TextEditingController();
@@ -241,6 +325,12 @@ class _QuanLiTaiXeState extends State<QuanLiTaiXe> {
                           ),
                           Column(
                             children: [
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                onPressed: () => _sua(tx),
+                                child: const Icon(CupertinoIcons.pencil,
+                                    color: mauXanhSang, size: 18),
+                              ),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
                                 onPressed: () async {

@@ -29,8 +29,17 @@ class ThanhToan extends StatefulWidget {
 class _ThanhToanState extends State<ThanhToan> {
   final _tenCtrl = TextEditingController();
   final _sdtCtrl = TextEditingController();
+  final _maKMCtrl = TextEditingController();
   int _ptThanhToan = 0;
   bool _dangXuLy = false;
+  int _phiDichVu = 0;
+  int _giamGia = 0;
+  KhuyenMai? _kmApDung;
+  bool _dangApKM = false;
+  String? _loiKM;
+  bool _daApKM = false;
+
+  int get _giaThucTe => widget.tongTien + _phiDichVu - _giamGia;
 
   @override
   void initState() {
@@ -39,6 +48,46 @@ class _ThanhToanState extends State<ThanhToan> {
     if (nd != null) {
       _tenCtrl.text = nd.ten;
       _sdtCtrl.text = nd.sdt;
+    }
+    _taiCauHinh();
+  }
+
+  Future<void> _taiCauHinh() async {
+    try {
+      final cfg = await CoSoDuLieu().layCauHinh();
+      if (!mounted) return;
+      setState(() {
+        _phiDichVu = (cfg['phi_dich_vu'] as num?)?.toInt() ?? 0;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _apDungKM() async {
+    final ma = _maKMCtrl.text.trim();
+    if (ma.isEmpty) return;
+    setState(() { _dangApKM = true; _loiKM = null; });
+    try {
+      final (giam, km) = await CoSoDuLieu().apDungKhuyenMai(ma, widget.tongTien);
+      if (!mounted) return;
+      if (km == null) {
+        setState(() {
+          _dangApKM = false;
+          _loiKM = 'Mã không hợp lệ hoặc đã hết lượt sử dụng.';
+          _giamGia = 0;
+          _kmApDung = null;
+          _daApKM = false;
+        });
+      } else {
+        setState(() {
+          _dangApKM = false;
+          _giamGia = giam;
+          _kmApDung = km;
+          _daApKM = true;
+          _loiKM = null;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() { _dangApKM = false; _loiKM = 'Lỗi kết nối, thử lại.'; });
     }
   }
   final List<Map<String, dynamic>> _phuongThuc = [
@@ -94,7 +143,7 @@ class _ThanhToanState extends State<ThanhToan> {
           gio: widget.chuyen['gio'] as String,
           ngay: '${widget.ngay.day}/${widget.ngay.month}/${widget.ngay.year}',
           danhSachGhe: ghe,
-          tongTien: widget.tongTien,
+          tongTien: _giaThucTe,
           trangThai: 'cho',
           loaiXe: widget.chuyen['loai'] as String,
           ngayDat: CoSoDuLieu.dinhDangNgayHienTai(),
@@ -102,6 +151,9 @@ class _ThanhToanState extends State<ThanhToan> {
         );
         final veDaLuu = await db.datVe(ve);
         TrangThaiUngDung().themVeLocal(veDaLuu);
+        if (_kmApDung != null) {
+          await db.tangDaSuDungKhuyenMai(_kmApDung!.id!);
+        }
       } catch (_) {}
     }
 
@@ -120,11 +172,11 @@ class _ThanhToanState extends State<ThanhToan> {
     const chuTk = 'NGUYEN DONG HO';
 
     // MoMo: encode deeplink thành QR bằng qr_flutter
-    final momoQrData = 'momo://transfer?phone=$sdtMoMo&amount=${widget.tongTien}&note=$maGiaoDich';
+    final momoQrData = 'momo://transfer?phone=$sdtMoMo&amount=$_giaThucTe&note=$maGiaoDich';
     // Ngân hàng: gọi API VietQR lấy ảnh QR chuẩn Napas (tất cả app ngân hàng VN đều quét được)
     final vietQrUrl = Uri.encodeFull(
       'https://img.vietqr.io/image/$maNganHang-$stk-compact2.png'
-      '?amount=${widget.tongTien}&addInfo=$maGiaoDich&accountName=$chuTk',
+      '?amount=$_giaThucTe&addInfo=$maGiaoDich&accountName=$chuTk',
     );
 
     bool? ketQua;
@@ -243,7 +295,7 @@ class _ThanhToanState extends State<ThanhToan> {
                       const SizedBox(height: 6),
                       _DongThanhToan(nhan: 'Chủ TK', gia: chuTk, laMauXanh: false),
                       const SizedBox(height: 6),
-                      _DongThanhToan(nhan: 'Số tiền', gia: _dinhDang(widget.tongTien), laMauXanh: true),
+                      _DongThanhToan(nhan: 'Số tiền', gia: _dinhDang(_giaThucTe), laMauXanh: true),
                       const SizedBox(height: 6),
                       _DongThanhToan(nhan: 'Nội dung', gia: maGiaoDich, laMauXanh: false),
                     ],
@@ -308,7 +360,7 @@ class _ThanhToanState extends State<ThanhToan> {
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             Text('Ghế: ${(widget.gheChon..sort()).join(', ')}'),
-            Text('Tổng tiền: ${_dinhDang(widget.tongTien)}',
+            Text('Tổng tiền: ${_dinhDang(_giaThucTe)}',
                 style: const TextStyle(
                     color: mauXanhLa, fontWeight: FontWeight.bold)),
           ]),
@@ -332,6 +384,7 @@ class _ThanhToanState extends State<ThanhToan> {
   void dispose() {
     _tenCtrl.dispose();
     _sdtCtrl.dispose();
+    _maKMCtrl.dispose();
     super.dispose();
   }
 
@@ -403,15 +456,21 @@ class _ThanhToanState extends State<ThanhToan> {
                         const SizedBox(height: 6),
                         Container(height: 0.5, color: mauCardVien),
                         const SizedBox(height: 6),
+                        _Dong(nhan: 'Tiền vé', gia: _dinhDang(widget.tongTien)),
+                        if (_phiDichVu > 0)
+                          _Dong(nhan: 'Phí dịch vụ', gia: _dinhDang(_phiDichVu)),
+                        if (_giamGia > 0)
+                          _Dong(nhan: 'Giảm giá (${_kmApDung?.ten ?? ''})', gia: '- ${_dinhDang(_giamGia)}'),
+                        const SizedBox(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Tổng tiền',
+                            const Text('Tổng thanh toán',
                                 style: TextStyle(
                                     color: mauTextTrang,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15)),
-                            Text(_dinhDang(widget.tongTien),
+                            Text(_dinhDang(_giaThucTe),
                                 style: const TextStyle(
                                     color: mauXanhLa,
                                     fontWeight: FontWeight.bold,
@@ -419,6 +478,92 @@ class _ThanhToanState extends State<ThanhToan> {
                           ],
                         ),
                       ]),
+                    ),
+                    const SizedBox(height: 14),
+                    _SectionCard(
+                      tieuDe: 'Mã khuyến mãi',
+                      con: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CupertinoTextField(
+                                  controller: _maKMCtrl,
+                                  placeholder: 'Nhập mã khuyến mãi',
+                                  placeholderStyle: const TextStyle(
+                                      color: mauTextXam, fontSize: 13),
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 13),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: mauNenToi,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: mauCardVien),
+                                  ),
+                                  enabled: !_daApKM,
+                                  textCapitalization:
+                                      TextCapitalization.characters,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              CupertinoButton(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 8),
+                                color: _daApKM
+                                    ? mauCardVien
+                                    : mauXanhChinh,
+                                borderRadius: BorderRadius.circular(10),
+                                onPressed: _daApKM
+                                    ? () {
+                                        setState(() {
+                                          _daApKM = false;
+                                          _giamGia = 0;
+                                          _kmApDung = null;
+                                          _loiKM = null;
+                                          _maKMCtrl.clear();
+                                        });
+                                      }
+                                    : _dangApKM ? null : _apDungKM,
+                                child: _dangApKM
+                                    ? const CupertinoActivityIndicator(
+                                        radius: 8,
+                                        color: CupertinoColors.white)
+                                    : Text(
+                                        _daApKM ? 'Bỏ' : 'Áp dụng',
+                                        style: const TextStyle(
+                                            color: CupertinoColors.white,
+                                            fontSize: 13),
+                                      ),
+                              ),
+                            ],
+                          ),
+                          if (_loiKM != null) ...[
+                            const SizedBox(height: 6),
+                            Text(_loiKM!,
+                                style: const TextStyle(
+                                    color: mauDoHong, fontSize: 12)),
+                          ],
+                          if (_daApKM && _kmApDung != null) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(CupertinoIcons.ticket_fill,
+                                    color: mauXanhLa, size: 14),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Áp dụng "${_kmApDung!.ten}" – Giảm ${_dinhDang(_giamGia)}',
+                                    style: const TextStyle(
+                                        color: mauXanhLa, fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 14),
                     _SectionCard(

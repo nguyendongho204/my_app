@@ -30,15 +30,17 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
   }
 
   void _them() {
-    final maCtrl   = TextEditingController();
-    final tenCtrl  = TextEditingController();
+    final maCtrl    = TextEditingController();
+    final tenCtrl   = TextEditingController();
     final giaTriCtrl = TextEditingController();
     final toiDaCtrl  = TextEditingController();
-    final bdCtrl   = TextEditingController();
-    final ktCtrl   = TextEditingController();
     final gioiHanCtrl = TextEditingController();
     String loai = 'phan_tram';
+    DateTime? ngayBD;
+    DateTime? ngayKT;
     String? loi;
+
+    String fmt(DateTime? d) => d == null ? 'Chưa chọn' : '${d.day}/${d.month}/${d.year}';
 
     showCupertinoModalPopup(
       context: context,
@@ -106,14 +108,102 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                       ph: 'Giảm tối đa (VNĐ, 0 = không giới hạn)',
                       kiboard: TextInputType.number),
                   const SizedBox(height: 8),
-                  _KF(ctrl: bdCtrl, ph: 'Ngày bắt đầu (d/m/yyyy)'),
-                  const SizedBox(height: 8),
-                  _KF(ctrl: ktCtrl, ph: 'Ngày kết thúc (d/m/yyyy)'),
-                  const SizedBox(height: 8),
                   _KF(
                       ctrl: gioiHanCtrl,
                       ph: 'Giới hạn lượt dùng (0 = không giới hạn)',
                       kiboard: TextInputType.number),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            DateTime tg = ngayBD ?? DateTime.now();
+                            await showCupertinoModalPopup(
+                              context: context,
+                              builder: (_) => Container(
+                                height: 280, color: mauCardNen,
+                                child: Column(children: [
+                                  SizedBox(height: 220,
+                                    child: CupertinoDatePicker(
+                                      mode: CupertinoDatePickerMode.date,
+                                      initialDateTime: tg,
+                                      onDateTimeChanged: (d) => tg = d,
+                                    )),
+                                  CupertinoButton(
+                                    onPressed: () {
+                                      setM(() => ngayBD = tg);
+                                      Navigator.of(context, rootNavigator: true).pop();
+                                    },
+                                    child: const Text('Áp dụng')),
+                                ]),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: mauNenToi,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: mauCardVien),
+                            ),
+                            child: Row(children: [
+                              const Icon(CupertinoIcons.calendar,
+                                  color: mauXanhSang, size: 16),
+                              const SizedBox(width: 8),
+                              Text('BĐ: ${fmt(ngayBD)}',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 13)),
+                            ]),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            DateTime tg = ngayKT ?? DateTime.now();
+                            await showCupertinoModalPopup(
+                              context: context,
+                              builder: (_) => Container(
+                                height: 280, color: mauCardNen,
+                                child: Column(children: [
+                                  SizedBox(height: 220,
+                                    child: CupertinoDatePicker(
+                                      mode: CupertinoDatePickerMode.date,
+                                      initialDateTime: tg,
+                                      onDateTimeChanged: (d) => tg = d,
+                                    )),
+                                  CupertinoButton(
+                                    onPressed: () {
+                                      setM(() => ngayKT = tg);
+                                      Navigator.of(context, rootNavigator: true).pop();
+                                    },
+                                    child: const Text('Áp dụng')),
+                                ]),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: mauNenToi,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: mauCardVien),
+                            ),
+                            child: Row(children: [
+                              const Icon(CupertinoIcons.calendar,
+                                  color: mauCam, size: 16),
+                              const SizedBox(width: 8),
+                              Text('KT: ${fmt(ngayKT)}',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 13)),
+                            ]),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   if (loi != null) ...[
                     const SizedBox(height: 8),
                     Text(loi!,
@@ -137,8 +227,8 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                           ma: ma, ten: ten, loaiGiam: loai,
                           giaTriGiam: gt,
                           giaTriToiDa: int.tryParse(toiDaCtrl.text.trim()) ?? 0,
-                          ngayBatDau: bdCtrl.text.trim(),
-                          ngayKetThuc: ktCtrl.text.trim(),
+                          ngayBatDau: ngayBD != null ? '${ngayBD!.day}/${ngayBD!.month}/${ngayBD!.year}' : '',
+                          ngayKetThuc: ngayKT != null ? '${ngayKT!.day}/${ngayKT!.month}/${ngayKT!.year}' : '',
                           gioiHanSuDung: int.tryParse(gioiHanCtrl.text.trim()) ?? 0,
                           daSuDung: 0,
                           trangThai: 'hoat_dong',
@@ -157,6 +247,218 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
     );
   }
 
+  void _sua(KhuyenMai km) {
+    final maCtrl    = TextEditingController(text: km.ma);
+    final tenCtrl   = TextEditingController(text: km.ten);
+    final giaTriCtrl = TextEditingController(text: km.giaTriGiam.toString());
+    final toiDaCtrl  = TextEditingController(text: km.giaTriToiDa.toString());
+    final gioiHanCtrl = TextEditingController(text: km.gioiHanSuDung.toString());
+    String loai = km.loaiGiam;
+    DateTime? ngayBD = _parseNgay(km.ngayBatDau);
+    DateTime? ngayKT = _parseNgay(km.ngayKetThuc);
+    String? loi;
+
+    String fmt(DateTime? d) => d == null ? 'Chưa chọn' : '${d.day}/${d.month}/${d.year}';
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (_, setM) => Container(
+          decoration: const BoxDecoration(
+              color: mauCardNen,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+          padding: EdgeInsets.only(
+              left: 20, right: 20, top: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 32),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36, height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: mauCardVien,
+                          borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                  const Text('Sửa khuyến mãi',
+                      style: TextStyle(
+                          color: mauTextTrang, fontSize: 17,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  _KF(ctrl: maCtrl, ph: 'Mã giảm giá'),
+                  const SizedBox(height: 8),
+                  _KF(ctrl: tenCtrl, ph: 'Tên chương trình'),
+                  const SizedBox(height: 10),
+                  const Text('Loại giảm giá',
+                      style: TextStyle(color: mauTextXam, fontSize: 12)),
+                  const SizedBox(height: 6),
+                  CupertinoSlidingSegmentedControl<String>(
+                    groupValue: loai,
+                    backgroundColor: mauNenToi,
+                    children: const {
+                      'phan_tram': Text('% Phần trăm', style: TextStyle(fontSize: 12)),
+                      'so_tien': Text('Số tiền cố định', style: TextStyle(fontSize: 12)),
+                    },
+                    onValueChanged: (v) { if (v != null) setM(() => loai = v); },
+                  ),
+                  const SizedBox(height: 8),
+                  _KF(ctrl: giaTriCtrl,
+                      ph: loai == 'phan_tram' ? 'Giá trị giảm (%)' : 'Số tiền giảm (VNĐ)',
+                      kiboard: TextInputType.number),
+                  const SizedBox(height: 8),
+                  _KF(ctrl: toiDaCtrl,
+                      ph: 'Giảm tối đa (VNĐ, 0 = không giới hạn)',
+                      kiboard: TextInputType.number),
+                  const SizedBox(height: 8),
+                  _KF(ctrl: gioiHanCtrl,
+                      ph: 'Giới hạn lượt dùng (0 = không giới hạn)',
+                      kiboard: TextInputType.number),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            DateTime tg = ngayBD ?? DateTime.now();
+                            await showCupertinoModalPopup(
+                              context: context,
+                              builder: (_) => Container(
+                                height: 280, color: mauCardNen,
+                                child: Column(children: [
+                                  SizedBox(height: 220, child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.date,
+                                    initialDateTime: tg,
+                                    onDateTimeChanged: (d) => tg = d,
+                                  )),
+                                  CupertinoButton(
+                                    onPressed: () {
+                                      setM(() => ngayBD = tg);
+                                      Navigator.of(context, rootNavigator: true).pop();
+                                    },
+                                    child: const Text('Áp dụng')),
+                                ]),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: mauNenToi,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: mauCardVien),
+                            ),
+                            child: Row(children: [
+                              const Icon(CupertinoIcons.calendar,
+                                  color: mauXanhSang, size: 16),
+                              const SizedBox(width: 8),
+                              Text('BĐ: ${fmt(ngayBD)}',
+                                  style: const TextStyle(color: mauTextTrang, fontSize: 13)),
+                            ]),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            DateTime tg = ngayKT ?? DateTime.now();
+                            await showCupertinoModalPopup(
+                              context: context,
+                              builder: (_) => Container(
+                                height: 280, color: mauCardNen,
+                                child: Column(children: [
+                                  SizedBox(height: 220, child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.date,
+                                    initialDateTime: tg,
+                                    onDateTimeChanged: (d) => tg = d,
+                                  )),
+                                  CupertinoButton(
+                                    onPressed: () {
+                                      setM(() => ngayKT = tg);
+                                      Navigator.of(context, rootNavigator: true).pop();
+                                    },
+                                    child: const Text('Áp dụng')),
+                                ]),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: mauNenToi,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: mauCardVien),
+                            ),
+                            child: Row(children: [
+                              const Icon(CupertinoIcons.calendar,
+                                  color: mauCam, size: 16),
+                              const SizedBox(width: 8),
+                              Text('KT: ${fmt(ngayKT)}',
+                                  style: const TextStyle(color: mauTextTrang, fontSize: 13)),
+                            ]),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (loi != null) ...[
+                    const SizedBox(height: 8),
+                    Text(loi!, style: const TextStyle(color: mauDoHong, fontSize: 12)),
+                  ],
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CupertinoButton.filled(
+                      onPressed: () async {
+                        final ma = maCtrl.text.trim().toUpperCase();
+                        final ten = tenCtrl.text.trim();
+                        final gt = int.tryParse(giaTriCtrl.text.trim()) ?? 0;
+                        if (ma.isEmpty || ten.isEmpty || gt == 0) {
+                          setM(() => loi = 'Vui lòng điền đầy đủ thông tin');
+                          return;
+                        }
+                        Navigator.of(context, rootNavigator: true).pop();
+                        await CoSoDuLieu().capNhatKhuyenMai(km.id!, KhuyenMai(
+                          id: km.id,
+                          ma: ma, ten: ten, loaiGiam: loai,
+                          giaTriGiam: gt,
+                          giaTriToiDa: int.tryParse(toiDaCtrl.text.trim()) ?? 0,
+                          ngayBatDau: ngayBD != null ? '${ngayBD!.day}/${ngayBD!.month}/${ngayBD!.year}' : km.ngayBatDau,
+                          ngayKetThuc: ngayKT != null ? '${ngayKT!.day}/${ngayKT!.month}/${ngayKT!.year}' : km.ngayKetThuc,
+                          gioiHanSuDung: int.tryParse(gioiHanCtrl.text.trim()) ?? 0,
+                          daSuDung: km.daSuDung,
+                          trangThai: km.trangThai,
+                        ));
+                        _tai();
+                      },
+                      child: const Text('Lưu'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DateTime? _parseNgay(String s) {
+    if (s.isEmpty) return null;
+    try {
+      final p = s.split('/');
+      if (p.length != 3) return null;
+      return DateTime(int.parse(p[2]), int.parse(p[1]), int.parse(p[0]));
+    } catch (_) {
+      return null;
+    }
+  }
   Color _mau(String tt) {
     switch (tt) {
       case 'hoat_dong':  return const Color(0xFF00C853);
@@ -300,6 +602,13 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                             children: [
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
+                                onPressed: () => _sua(km),
+                                child: const Icon(CupertinoIcons.pencil,
+                                    color: mauXanhSang, size: 20),
+                              ),
+                              const SizedBox(width: 4),
+                              CupertinoButton(
+                                padding: EdgeInsets.zero,
                                 onPressed: () async {
                                   final next =
                                       km.trangThai == 'hoat_dong'
@@ -325,10 +634,37 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                               const SizedBox(width: 8),
                               CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                onPressed: () async {
-                                  await CoSoDuLieu()
-                                      .xoaKhuyenMai(km.id!);
-                                  _tai();
+                                onPressed: () {
+                                  showCupertinoDialog(
+                                    context: context,
+                                    builder: (_) => CupertinoAlertDialog(
+                                      title: const Text('Xóa khuyến mãi'),
+                                      content: Text(
+                                          'Xác nhận xóa mã "${km.ma}"?'),
+                                      actions: [
+                                        CupertinoDialogAction(
+                                          isDestructiveAction: true,
+                                          onPressed: () async {
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop();
+                                            await CoSoDuLieu()
+                                                .xoaKhuyenMai(km.id!);
+                                            _tai();
+                                          },
+                                          child: const Text('Xóa'),
+                                        ),
+                                        CupertinoDialogAction(
+                                          isDefaultAction: true,
+                                          onPressed: () => Navigator.of(
+                                                  context,
+                                                  rootNavigator: true)
+                                              .pop(),
+                                          child: const Text('Hủy'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 },
                                 child: const Icon(
                                     CupertinoIcons.trash,

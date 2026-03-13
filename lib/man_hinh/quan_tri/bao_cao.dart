@@ -11,7 +11,7 @@ class BaoCao extends StatefulWidget {
 class _BaoCaoState extends State<BaoCao> {
   bool _dangTai = true;
   List<Ve> _tatCaVe = [];
-  // Key: ngay string, Value: revenue
+  DateTime _ngayChon = DateTime.now();
   final Map<String, int> _doanhThu7Ngay = {};
   final Map<String, int> _soVe7Ngay = {};
   Map<String, int> _topTuyen = {};
@@ -27,16 +27,16 @@ class _BaoCaoState extends State<BaoCao> {
     try {
       final ds = await CoSoDuLieu().layTatCaVe();
       if (!mounted) return;
-      // Build 7-day stats
-      final now = DateTime.now();
+      final moc = DateTime(_ngayChon.year, _ngayChon.month, _ngayChon.day);
       final thu = <String, int>{};
       final soV = <String, int>{};
       for (var d = 6; d >= 0; d--) {
-        final day = now.subtract(Duration(days: d));
+        final day = moc.subtract(Duration(days: d));
         final key = '${day.day}/${day.month}/${day.year}';
         thu[key] = 0;
         soV[key] = 0;
       }
+
       final tuyenCount = <String, int>{};
       for (final ve in ds) {
         final kN = ve.ngay;
@@ -49,8 +49,10 @@ class _BaoCaoState extends State<BaoCao> {
         final tk = '${ve.diemDi} → ${ve.diemDen}';
         tuyenCount[tk] = (tuyenCount[tk] ?? 0) + 1;
       }
+
       final sorted = tuyenCount.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
+
       if (!mounted) return;
       setState(() {
         _tatCaVe = ds;
@@ -76,7 +78,175 @@ class _BaoCaoState extends State<BaoCao> {
       if (i > 0 && (s.length - i) % 3 == 0) kq += '.';
       kq += s[i];
     }
-    return '${kq}đ';
+    return '$kqđ';
+  }
+
+  String _thangTiengViet(int thang) {
+    const tenThang = [
+      'Một',
+      'Hai',
+      'Ba',
+      'Tư',
+      'Năm',
+      'Sáu',
+      'Bảy',
+      'Tám',
+      'Chín',
+      'Mười',
+      'Mười một',
+      'Mười hai',
+    ];
+    if (thang < 1 || thang > 12) return '';
+    return tenThang[thang - 1];
+  }
+
+  String get _ngayStr {
+    final d = _ngayChon.day;
+    final m = _thangTiengViet(_ngayChon.month);
+    final y = _ngayChon.year;
+    return 'ngày $d tháng $m năm $y';
+  }
+
+  int _soNgayTrongThang(int nam, int thang) =>
+      DateTime(nam, thang + 1, 0).day;
+
+  Future<void> _moChonNgay() async {
+    final now = DateTime.now();
+    const minNam = 2000;
+    int nam = _ngayChon.year;
+    int thang = _ngayChon.month;
+    int ngay = _ngayChon.day;
+
+    final dayCtrl = FixedExtentScrollController(initialItem: ngay - 1);
+    final monthCtrl = FixedExtentScrollController(initialItem: thang - 1);
+    final yearCtrl =
+        FixedExtentScrollController(initialItem: nam - minNam);
+
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setM) {
+          final maxNam = now.year;
+          final isThangToiDa = nam == now.year;
+          final maxThang = isThangToiDa ? now.month : 12;
+          final maxNgay = _soNgayTrongThang(nam, thang);
+          final isNgayToiDa = isThangToiDa && thang == now.month;
+          final ngayToiDa = isNgayToiDa ? now.day : maxNgay;
+
+          if (ngay > ngayToiDa) {
+            ngay = ngayToiDa;
+            dayCtrl.jumpToItem(ngay - 1);
+          }
+
+          return Container(
+            height: 320,
+            color: mauCardNen,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 250,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoPicker(
+                          scrollController: dayCtrl,
+                          itemExtent: 34,
+                          onSelectedItemChanged: (i) {
+                            setM(() => ngay = i + 1);
+                          },
+                          children: List.generate(ngayToiDa, (i) {
+                            return Center(
+                              child: Text('ngày ${i + 1}',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 18)),
+                            );
+                          }),
+                        ),
+                      ),
+                      Expanded(
+                        child: CupertinoPicker(
+                          scrollController: monthCtrl,
+                          itemExtent: 34,
+                          onSelectedItemChanged: (i) {
+                            setM(() {
+                              final thangMoi = i + 1;
+                              thang = thangMoi > maxThang ? maxThang : thangMoi;
+                              final maxNgayMoi = _soNgayTrongThang(nam, thang);
+                              final ngayToiDaMoi =
+                                  (nam == now.year && thang == now.month)
+                                      ? now.day
+                                      : maxNgayMoi;
+                              if (ngay > ngayToiDaMoi) {
+                                ngay = ngayToiDaMoi;
+                                dayCtrl.jumpToItem(ngay - 1);
+                              }
+                            });
+                          },
+                          children: List.generate(maxThang, (i) {
+                            return Center(
+                              child: Text('tháng ${i + 1}',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 18)),
+                            );
+                          }),
+                        ),
+                      ),
+                      Expanded(
+                        child: CupertinoPicker(
+                          scrollController: yearCtrl,
+                          itemExtent: 34,
+                          onSelectedItemChanged: (i) {
+                            setM(() {
+                              nam = minNam + i;
+                              if (nam > maxNam) nam = maxNam;
+                              if (nam == now.year && thang > now.month) {
+                                thang = now.month;
+                                monthCtrl.jumpToItem(thang - 1);
+                              }
+                              final maxNgayMoi = _soNgayTrongThang(nam, thang);
+                              final ngayToiDaMoi =
+                                  (nam == now.year && thang == now.month)
+                                      ? now.day
+                                      : maxNgayMoi;
+                              if (ngay > ngayToiDaMoi) {
+                                ngay = ngayToiDaMoi;
+                                dayCtrl.jumpToItem(ngay - 1);
+                              }
+                            });
+                          },
+                          children: List.generate(maxNam - minNam + 1, (i) {
+                            final y = minNam + i;
+                            return Center(
+                              child: Text('năm $y',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 18)),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    setState(() {
+                      _ngayChon = DateTime(nam, thang, ngay);
+                    });
+                    _tai();
+                  },
+                  child: const Text('Áp dụng'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    dayCtrl.dispose();
+    monthCtrl.dispose();
+    yearCtrl.dispose();
   }
 
   int get _tongDoanhThu => _tatCaVe
@@ -87,8 +257,7 @@ class _BaoCaoState extends State<BaoCao> {
   int get _veHT =>
       _tatCaVe.where((v) => v.trangThai == 'hoan_thanh').length;
 
-  double get _tiLeHT =>
-      _tongVe == 0 ? 0 : _veHT / _tongVe;
+  double get _tiLeHT => _tongVe == 0 ? 0 : _veHT / _tongVe;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +289,41 @@ class _BaoCaoState extends State<BaoCao> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Tổng quát
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: mauCardNen,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: mauCardVien),
+                  ),
+                  child: Row(
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: _moChonNgay,
+                        child: Row(
+                          children: [
+                            const Icon(CupertinoIcons.calendar,
+                                color: mauXanhSang, size: 16),
+                            const SizedBox(width: 6),
+                            Text(_ngayStr,
+                                style: const TextStyle(
+                                    color: mauXanhSang,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13)),
+                            const SizedBox(width: 4),
+                            const Icon(CupertinoIcons.chevron_down,
+                                color: mauXanhSang, size: 12),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      const Text('Mốc báo cáo',
+                          style: TextStyle(color: mauTextXam, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 const Text('Tổng quát',
                     style: TextStyle(
                         color: mauTextTrang,
@@ -163,7 +366,6 @@ class _BaoCaoState extends State<BaoCao> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // 7 ngày gần nhất
                 const Text('Doanh thu 7 ngày gần nhất',
                     style: TextStyle(
                         color: mauTextTrang,
@@ -179,46 +381,33 @@ class _BaoCaoState extends State<BaoCao> {
                   ),
                   child: Column(
                     children: _doanhThu7Ngay.entries.map((e) {
-                      final pct =
-                          maxThu == 0 ? 0.0 : e.value / maxThu;
+                      final pct = maxThu == 0 ? 0.0 : e.value / maxThu;
                       final parts = e.key.split('/');
-                      final label =
-                          parts.length >= 2 ? '${parts[0]}/${parts[1]}' : e.key;
+                      final label = parts.length >= 2 ? '${parts[0]}/${parts[1]}' : e.key;
                       return Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.only(bottom: 10),
                         child: Row(
                           children: [
                             SizedBox(
                               width: 40,
                               child: Text(label,
                                   style: const TextStyle(
-                                      color: mauTextXam,
-                                      fontSize: 11)),
+                                      color: mauTextXam, fontSize: 11)),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    height: 18,
-                                    alignment: Alignment.centerLeft,
-                                    child: FractionallySizedBox(
-                                      widthFactor: pct
-                                          .clamp(0.02, 1.0)
-                                          .toDouble(),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: gradientChinh,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                      ),
+                              child: Container(
+                                height: 18,
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: pct.clamp(0.02, 1.0).toDouble(),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: gradientChinh,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -228,9 +417,7 @@ class _BaoCaoState extends State<BaoCao> {
                                 _tien(e.value),
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  color: e.value > 0
-                                      ? mauXanhSang
-                                      : mauTextXam,
+                                  color: e.value > 0 ? mauXanhSang : mauTextXam,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -243,7 +430,6 @@ class _BaoCaoState extends State<BaoCao> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Top tuyến
                 if (_topTuyen.isNotEmpty) ...[
                   const Text('Top tuyến đặt nhiều nhất',
                       style: TextStyle(
@@ -258,33 +444,25 @@ class _BaoCaoState extends State<BaoCao> {
                       border: Border.all(color: mauCardVien),
                     ),
                     child: Column(
-                      children:
-                          _topTuyen.entries.toList().asMap().entries.map((entry) {
+                      children: _topTuyen.entries.toList().asMap().entries.map((entry) {
                         final idx = entry.key;
                         final e = entry.value;
                         final medals = ['🥇', '🥈', '🥉', '4.', '5.'];
                         return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            border: idx <
-                                    _topTuyen.length - 1
-                                ? const Border(
-                                    bottom: BorderSide(
-                                        color: mauCardVien))
+                            border: idx < _topTuyen.length - 1
+                                ? const Border(bottom: BorderSide(color: mauCardVien))
                                 : null,
                           ),
                           child: Row(
                             children: [
-                              Text(medals[idx],
-                                  style: const TextStyle(
-                                      fontSize: 16)),
+                              Text(medals[idx], style: const TextStyle(fontSize: 16)),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(e.key,
                                     style: const TextStyle(
-                                        color: mauTextTrang,
-                                        fontSize: 13)),
+                                        color: mauTextTrang, fontSize: 13)),
                               ),
                               Text('${e.value} vé',
                                   style: const TextStyle(

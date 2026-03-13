@@ -36,7 +36,7 @@ class _CauHinhHTState extends State<CauHinhHT> {
     try {
       final futures = await Future.wait([
         CoSoDuLieu().layCauHinh(),
-        CoSoDuLieu().layLichSuSoatTatCa(),
+        CoSoDuLieu().layLichSuSoatTatCa(tatCa: true),
       ]);
       final cfg = futures[0] as Map<String, dynamic>;
       final ls = futures[1] as List<Map<String, dynamic>>;

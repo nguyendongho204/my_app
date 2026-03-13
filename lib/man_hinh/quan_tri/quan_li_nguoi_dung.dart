@@ -9,10 +9,11 @@ class QuanLiNguoiDung extends StatefulWidget {
 }
 
 class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
-  int _tab = 0; // 0=Khách hàng, 1=Admin
+  int _tab = 0; // 0=Khách hàng, 1=Admin, 2=Nhân viên
   bool _dangTai = true;
   List<NguoiDung> _kh = [];
   List<Admin> _admins = [];
+  List<NhanVien> _nvs = [];
 
   @override
   void initState() {
@@ -26,11 +27,13 @@ class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
       final r = await Future.wait([
         CoSoDuLieu().layTatCaNguoiDung(),
         CoSoDuLieu().layTatCaAdmin(),
+        CoSoDuLieu().layTatCaNhanVien(),
       ]);
       if (!mounted) return;
       setState(() {
         _kh = r[0] as List<NguoiDung>;
         _admins = r[1] as List<Admin>;
+        _nvs = r[2] as List<NhanVien>;
         _dangTai = false;
       });
     } catch (_) {
@@ -142,6 +145,13 @@ class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
                 onPressed: _themAdmin,
                 child: const Icon(CupertinoIcons.add,
                     color: mauXanhSang, size: 22),
+              )
+            else if (_tab == 2)
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _themNhanVien,
+                child: const Icon(CupertinoIcons.add,
+                    color: mauXanhSang, size: 22),
               ),
           ],
         ),
@@ -159,6 +169,8 @@ class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
                     style: const TextStyle(fontSize: 12)),
                 1: Text('Admin (${_admins.length})',
                     style: const TextStyle(fontSize: 12)),
+                2: Text('NV (${_nvs.length})',
+                    style: const TextStyle(fontSize: 12)),
               },
               onValueChanged: (v) {
                 if (v != null) setState(() => _tab = v);
@@ -172,7 +184,9 @@ class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
                         radius: 14, color: mauXanhSang))
                 : _tab == 0
                     ? _buildKH()
-                    : _buildAdmin(),
+                    : _tab == 1
+                        ? _buildAdmin()
+                        : _buildNV(),
           ),
         ],
       ),
@@ -307,6 +321,176 @@ class _QuanLiNguoiDungState extends State<QuanLiNguoiDung> {
               ),
               const Icon(CupertinoIcons.checkmark_seal_fill,
                   color: mauXanhSang, size: 18),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _themNhanVien() {
+    final tenCtrl = TextEditingController();
+    final maNVCtrl = TextEditingController();
+    final mkCtrl = TextEditingController();
+    String? loi;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (_, setM) => Container(
+          decoration: const BoxDecoration(
+            color: mauCardNen,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: mauCardVien,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const Text('Thêm nhân viên',
+                    style: TextStyle(
+                        color: mauTextTrang,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                _Cf(ctrl: tenCtrl, ph: 'Họ và tên'),
+                const SizedBox(height: 10),
+                _Cf(ctrl: maNVCtrl, ph: 'Mã nhân viên'),
+                const SizedBox(height: 10),
+                _Cf(ctrl: mkCtrl, ph: 'Mật khẩu (tối thiểu 6 ký tự)'),
+                if (loi != null) ...[
+                  const SizedBox(height: 8),
+                  Text(loi!,
+                      style: const TextStyle(
+                          color: mauDoHong, fontSize: 12)),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton.filled(
+                    onPressed: () async {
+                      final ten = tenCtrl.text.trim();
+                      final ma = maNVCtrl.text.trim();
+                      final mk = mkCtrl.text;
+                      if (ten.isEmpty || ma.isEmpty || mk.length < 6) {
+                        setM(() => loi =
+                            'Mật khẩu tối thiểu 6 ký tự, điền đủ thông tin');
+                        return;
+                      }
+                      Navigator.of(context, rootNavigator: true).pop();
+                      await CoSoDuLieu().taoNhanVien(
+                          ten: ten, maNV: ma, matKhau: mk);
+                      _tai();
+                    },
+                    child: const Text('Thêm'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNV() {
+    if (_nvs.isEmpty) {
+      return const Center(
+          child: Text('Chưa có nhân viên nào',
+              style: TextStyle(color: mauTextXam)));
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _nvs.length,
+      itemBuilder: (_, i) {
+        final nv = _nvs[i];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: mauCardNen,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: mauCardVien),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: mauXanhLa.withAlpha(30),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                    CupertinoIcons.person_badge_plus,
+                    color: mauXanhLa,
+                    size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(nv.ten,
+                        style: const TextStyle(
+                            color: mauTextTrang,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14)),
+                    Text('Mã NV: ${nv.maNV}',
+                        style: const TextStyle(
+                            color: mauTextXam, fontSize: 12)),
+                  ],
+                ),
+              ),
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () async {
+                  final confirm = await showCupertinoDialog<bool>(
+                    context: context,
+                    builder: (_) => CupertinoAlertDialog(
+                      title: const Text('Xóa nhân viên'),
+                      content: Text(
+                          'Xóa "${nv.ten}" khỏi hệ thống?'),
+                      actions: [
+                        CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            onPressed: () => Navigator.of(
+                                    context,
+                                    rootNavigator: true)
+                                .pop(true),
+                            child: const Text('Xóa')),
+                        CupertinoDialogAction(
+                            onPressed: () => Navigator.of(
+                                    context,
+                                    rootNavigator: true)
+                                .pop(false),
+                            child: const Text('Hủy')),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await CoSoDuLieu().xoaNhanVien(nv.id!);
+                    _tai();
+                  }
+                },
+                child: const Icon(CupertinoIcons.trash,
+                    color: mauDoHong, size: 20),
+              ),
             ],
           ),
         );

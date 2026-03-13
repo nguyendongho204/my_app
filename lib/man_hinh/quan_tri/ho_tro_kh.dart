@@ -39,6 +39,20 @@ class _HoTroKHState extends State<HoTroKH> {
     final phanHoiCtrl = TextEditingController(text: kn.phanHoi);
     bool _dangGui = false;
 
+    // Khi admin mở, tự chuyển sang "đang xử lý" nếu đang ở trạng thái "chờ"
+    if (kn.trangThai == 'cho_xu_ly') {
+      CoSoDuLieu().capNhatTrangThaiKhieuNai(kn.id!, 'dang_xu_ly').then((_) {
+        // Cập nhật local để filter hoạt động đúng
+        final idx = _ds.indexWhere((k) => k.id == kn.id);
+        if (idx >= 0 && mounted) {
+          setState(() {
+            // Rebuild sẽ lấy lại từ list đã cập nhật
+          });
+        }
+        _tai(); // Reload để cập nhật badge số đếm trong dashboard
+      });
+    }
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => StatefulBuilder(

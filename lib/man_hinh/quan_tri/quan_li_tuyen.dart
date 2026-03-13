@@ -13,6 +13,8 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
   bool _dangTai = true;
   List<TuyenXe> _tuyenList = [];
   List<LichChay> _lichList = [];
+  List<Xe> _xeList = [];
+  List<TaiXe> _taixeList = [];
   DateTime _ngayLich = DateTime.now();
 
   @override
@@ -30,11 +32,15 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
       final r = await Future.wait([
         CoSoDuLieu().layTatCaTuyen(),
         CoSoDuLieu().layLichChay(ngay: _ngayStr),
+        CoSoDuLieu().layTatCaXe(),
+        CoSoDuLieu().layTatCaTaiXe(),
       ]);
       if (!mounted) return;
       setState(() {
         _tuyenList = r[0] as List<TuyenXe>;
         _lichList = r[1] as List<LichChay>;
+        _xeList = r[2] as List<Xe>;
+        _taixeList = r[3] as List<TaiXe>;
         _dangTai = false;
       });
     } catch (_) {
@@ -146,6 +152,257 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
     );
   }
 
+  void _suaTuyen(TuyenXe t) {
+    final ddCtrl = TextEditingController(text: t.diemDi);
+    final ddenCtrl = TextEditingController(text: t.diemDen);
+    final kmCtrl = TextEditingController(text: t.khoangCach.toString());
+    final tgCtrl = TextEditingController(text: t.thoiGian.toString());
+    final giaCtrl = TextEditingController(text: t.giaVeCoSo.toString());
+    String? loi;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setM) => _Modal(
+          tieuDe: 'Sửa tuyến xe',
+          icon: CupertinoIcons.pencil,
+          fields: [
+            _Nhap(ctrl: ddCtrl, ph: 'Điểm đi'),
+            _Nhap(ctrl: ddenCtrl, ph: 'Điểm đến'),
+            _Nhap(ctrl: kmCtrl, ph: 'Khoảng cách (km)', kb: TextInputType.number),
+            _Nhap(ctrl: tgCtrl, ph: 'Thời gian (phút)', kb: TextInputType.number),
+            _Nhap(ctrl: giaCtrl, ph: 'Giá vé cơ sở (VNĐ)', kb: TextInputType.number),
+          ],
+          loi: loi,
+          onLuu: () async {
+            final dd = ddCtrl.text.trim();
+            final dden = ddenCtrl.text.trim();
+            final km = int.tryParse(kmCtrl.text.trim()) ?? 0;
+            final tg = int.tryParse(tgCtrl.text.trim()) ?? 0;
+            final gia = int.tryParse(giaCtrl.text.trim()) ?? 0;
+            if (dd.isEmpty || dden.isEmpty || km == 0 || gia == 0) {
+              setM(() => loi = 'Vui lòng nhập đầy đủ thông tin');
+              return;
+            }
+            Navigator.of(context, rootNavigator: true).pop();
+            await CoSoDuLieu().capNhatTuyen(
+              t.id!,
+              TuyenXe(
+                diemDi: dd, diemDen: dden,
+                khoangCach: km, thoiGian: tg,
+                giaVeCoSo: gia,
+                danhSachDiemDon: t.danhSachDiemDon,
+                danhSachDiemTra: t.danhSachDiemTra,
+                hoatDong: t.hoatDong,
+              ),
+            );
+            _tai();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _suaLich(LichChay l) {
+    final gioCtrl = TextEditingController(text: l.gio);
+    final soGheCtrl = TextEditingController(text: l.soGheToiDa.toString());
+    String loaiXe = l.loaiXe;
+    int xeIdx = _xeList.indexWhere((x) => x.id == l.xeId);
+    int taixeIdx = _taixeList.indexWhere((tx) => tx.id == l.taiXeId);
+    String? loi;
+
+    // Pickers start at 0 = "Không phân công", so shift index by 1
+    int xePIdx = xeIdx < 0 ? 0 : xeIdx + 1;
+    int taixePIdx = taixeIdx < 0 ? 0 : taixeIdx + 1;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setM) => Container(
+          decoration: const BoxDecoration(
+            color: mauCardNen,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36, height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: mauCardVien,
+                          borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                  const Text('Sửa lịch chạy',
+                      style: TextStyle(
+                          color: mauTextTrang, fontSize: 17,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  _Nhap(ctrl: gioCtrl, ph: 'Giờ xuất phát (HH:mm)'),
+                  const SizedBox(height: 10),
+                  _Nhap(ctrl: soGheCtrl, ph: 'Số ghế tối đa',
+                      kb: TextInputType.number),
+                  const SizedBox(height: 10),
+                  CupertinoSlidingSegmentedControl<String>(
+                    groupValue: loaiXe,
+                    backgroundColor: mauNenToi,
+                    children: const {
+                      'Ghế thường': Text('Ghế thường',
+                          style: TextStyle(fontSize: 11)),
+                      'Giường nằm': Text('Giường nằm',
+                          style: TextStyle(fontSize: 11)),
+                      'Limousine': Text('Limousine',
+                          style: TextStyle(fontSize: 11)),
+                    },
+                    onValueChanged: (v) {
+                      if (v != null) setM(() => loaiXe = v);
+                    },
+                  ),
+                  if (_xeList.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    const Text('Phân công xe',
+                        style: TextStyle(color: mauTextXam, fontSize: 12)),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 100,
+                      child: CupertinoPicker(
+                        itemExtent: 36,
+                        scrollController: FixedExtentScrollController(
+                            initialItem: xePIdx),
+                        onSelectedItemChanged: (i) => xePIdx = i,
+                        children: [
+                          const Center(
+                              child: Text('— Không phân công —',
+                                  style: TextStyle(
+                                      color: mauTextXam, fontSize: 13))),
+                          ..._xeList.map((x) => Center(
+                                child: Text(
+                                    '${x.bienSo} (${x.loaiXe})',
+                                    style: const TextStyle(
+                                        color: mauTextTrang,
+                                        fontSize: 13)),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (_taixeList.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    const Text('Phân công tài xế',
+                        style: TextStyle(color: mauTextXam, fontSize: 12)),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 100,
+                      child: CupertinoPicker(
+                        itemExtent: 36,
+                        scrollController: FixedExtentScrollController(
+                            initialItem: taixePIdx),
+                        onSelectedItemChanged: (i) => taixePIdx = i,
+                        children: [
+                          const Center(
+                              child: Text('— Không phân công —',
+                                  style: TextStyle(
+                                      color: mauTextXam, fontSize: 13))),
+                          ..._taixeList.map((tx) => Center(
+                                child: Text(tx.ten,
+                                    style: const TextStyle(
+                                        color: mauTextTrang,
+                                        fontSize: 13)),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (loi != null) ...[
+                    const SizedBox(height: 8),
+                    Text(loi!,
+                        style: const TextStyle(
+                            color: mauDoHong, fontSize: 12)),
+                  ],
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CupertinoButton.filled(
+                      onPressed: () async {
+                        final soGhe =
+                            int.tryParse(soGheCtrl.text.trim()) ?? 0;
+                        if (soGhe == 0 || gioCtrl.text.trim().isEmpty) {
+                          setM(() => loi = 'Nhập đầy đủ thông tin');
+                          return;
+                        }
+                        final xeChon = (xePIdx > 0 && xePIdx - 1 < _xeList.length)
+                            ? _xeList[xePIdx - 1] : null;
+                        final txChon = (taixePIdx > 0 && taixePIdx - 1 < _taixeList.length)
+                            ? _taixeList[taixePIdx - 1] : null;
+                        Navigator.of(context, rootNavigator: true).pop();
+                        await CoSoDuLieu().capNhatLichChay(l.id!, {
+                          'gio': gioCtrl.text.trim(),
+                          'loaiXe': loaiXe,
+                          'soGheToiDa': soGhe,
+                          'xeId': xeChon?.id ?? '',
+                          'taiXeId': txChon?.id ?? '',
+                          'bienSoXe': xeChon?.bienSo ?? '',
+                          'tenTaiXe': txChon?.ten ?? '',
+                        });
+                        _tai();
+                      },
+                      child: const Text('Lưu'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _doiTrangThaiLich(LichChay l) {
+    const states = ['cho', 'dang_chay', 'hoan_thanh', 'huy'];
+    const labels = ['Chờ xuất phát', 'Đang chạy', 'Hoàn thành', 'Hủy chuyến'];
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        title: Text('Cập nhật trạng thái\n${l.diemDi} → ${l.diemDen}  ${l.gio}',
+            style: const TextStyle(fontSize: 14)),
+        actions: List.generate(states.length, (i) {
+          final isCurrent = l.trangThai == states[i];
+          return CupertinoActionSheetAction(
+            isDefaultAction: isCurrent,
+            isDestructiveAction: states[i] == 'huy',
+            onPressed: () async {
+              Navigator.of(context, rootNavigator: true).pop();
+              if (!isCurrent) {
+                await CoSoDuLieu()
+                    .capNhatLichChay(l.id!, {'trangThai': states[i]});
+                _tai();
+              }
+            },
+            child: Text(isCurrent
+                ? '${labels[i]}  ✓ (hiện tại)'
+                : labels[i]),
+          );
+        }),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          child: const Text('Hủy'),
+        ),
+      ),
+    );
+  }
+
   void _themLich() {
     if (_tuyenList.isEmpty) {
       showCupertinoDialog(
@@ -170,6 +427,8 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
     final gioCtrl = TextEditingController(text: '07:00');
     final soGheCtrl = TextEditingController();
     String loaiXe = 'Ghế thường';
+    int xePIdx = 0;
+    int taixePIdx = 0;
     String? loi;
 
     showCupertinoModalPopup(
@@ -246,6 +505,55 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                     if (v != null) setM(() => loaiXe = v);
                   },
                 ),
+                if (_xeList.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Text('Phân công xe (tuỳ chọn)',
+                      style: TextStyle(color: mauTextXam, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 100,
+                    child: CupertinoPicker(
+                      itemExtent: 36,
+                      onSelectedItemChanged: (i) => xePIdx = i,
+                      children: [
+                        const Center(
+                            child: Text('— Không phân công —',
+                                style: TextStyle(
+                                    color: mauTextXam, fontSize: 13))),
+                        ..._xeList.map((x) => Center(
+                              child: Text(
+                                  '${x.bienSo} (${x.loaiXe})',
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 13)),
+                            )),
+                      ],
+                    ),
+                  ),
+                ],
+                if (_taixeList.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Text('Phân công tài xế (tuỳ chọn)',
+                      style: TextStyle(color: mauTextXam, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 100,
+                    child: CupertinoPicker(
+                      itemExtent: 36,
+                      onSelectedItemChanged: (i) => taixePIdx = i,
+                      children: [
+                        const Center(
+                            child: Text('— Không phân công —',
+                                style: TextStyle(
+                                    color: mauTextXam, fontSize: 13))),
+                        ..._taixeList.map((tx) => Center(
+                              child: Text(tx.ten,
+                                  style: const TextStyle(
+                                      color: mauTextTrang, fontSize: 13)),
+                            )),
+                      ],
+                    ),
+                  ),
+                ],
                 if (loi != null) ...[
                   const SizedBox(height: 8),
                   Text(loi!,
@@ -265,6 +573,10 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                         setM(() => loi = 'Nhập đầy đủ thông tin');
                         return;
                       }
+                      final xeChon = (xePIdx > 0 && xePIdx - 1 < _xeList.length)
+                          ? _xeList[xePIdx - 1] : null;
+                      final txChon = (taixePIdx > 0 && taixePIdx - 1 < _taixeList.length)
+                          ? _taixeList[taixePIdx - 1] : null;
                       Navigator.of(context, rootNavigator: true).pop();
                       await CoSoDuLieu().taoLichChay(LichChay(
                         tuyenId: tuyen.id!,
@@ -276,6 +588,10 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                         soGheToiDa: soGhe,
                         soGheConLai: soGhe,
                         trangThai: 'cho',
+                        xeId: xeChon?.id ?? '',
+                        taiXeId: txChon?.id ?? '',
+                        bienSoXe: xeChon?.bienSo ?? '',
+                        tenTaiXe: txChon?.ten ?? '',
                       ));
                       _tai();
                     },
@@ -507,6 +823,13 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                 children: [
                   CupertinoButton(
                     padding: EdgeInsets.zero,
+                    onPressed: () => _suaTuyen(t),
+                    child: const Icon(CupertinoIcons.pencil,
+                        color: mauXanhSang, size: 20),
+                  ),
+                  const SizedBox(width: 4),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
                     onPressed: () async {
                       await CoSoDuLieu().capNhatTuyen(
                         t.id!,
@@ -578,53 +901,80 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: mau.withAlpha(60)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: mau.withAlpha(30),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(l.gio,
-                      style: TextStyle(
-                          color: mau,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${l.diemDi} → ${l.diemDen}',
-                        style: const TextStyle(
-                            color: mauTextTrang,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14)),
-                    Text(
-                        '${l.loaiXe}  •  ${l.soGheConLai}/${l.soGheToiDa} ghế trống',
-                        style: const TextStyle(
-                            color: mauTextXam, fontSize: 12)),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Badget(_tenLich(l.trangThai), mau),
-                  const SizedBox(height: 6),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () async {
-                      await CoSoDuLieu().xoaLichChay(l.id!);
-                      _tai();
-                    },
-                    child: const Icon(CupertinoIcons.trash,
-                        color: mauDoHong, size: 18),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: mau.withAlpha(30),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(l.gio,
+                          style: TextStyle(
+                              color: mau,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${l.diemDi} → ${l.diemDen}',
+                            style: const TextStyle(
+                                color: mauTextTrang,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14)),
+                        Text(
+                            '${l.loaiXe}  •  ${l.soGheConLai}/${l.soGheToiDa} ghế trống',
+                            style: const TextStyle(
+                                color: mauTextXam, fontSize: 12)),
+                        if (l.bienSoXe.isNotEmpty)
+                          Text('Xe: ${l.bienSoXe}',
+                              style: const TextStyle(
+                                  color: mauTextXamNhat, fontSize: 11)),
+                        if (l.tenTaiXe.isNotEmpty)
+                          Text('Tài xế: ${l.tenTaiXe}',
+                              style: const TextStyle(
+                                  color: mauTextXamNhat, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _doiTrangThaiLich(l),
+                        child: _Badget(_tenLich(l.trangThai), mau),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () => _suaLich(l),
+                            child: const Icon(CupertinoIcons.pencil,
+                                color: mauXanhSang, size: 16),
+                          ),
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () async {
+                              await CoSoDuLieu().xoaLichChay(l.id!);
+                              _tai();
+                            },
+                            child: const Icon(CupertinoIcons.trash,
+                                color: mauDoHong, size: 16),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),

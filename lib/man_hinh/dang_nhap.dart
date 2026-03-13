@@ -299,6 +299,10 @@ class _FormDangNhapState extends State<_FormDangNhap> {
       setState(() => _loi = 'Số điện thoại hoặc mật khẩu không đúng');
       return;
     }
+    if (nguoiDung.biKhoa) {
+      setState(() => _loi = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
+      return;
+    }
     TrangThaiUngDung().dangNhap(nguoiDung);
     if (!mounted) return;
     if (widget.laModal) {

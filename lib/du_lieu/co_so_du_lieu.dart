@@ -80,8 +80,15 @@ class Ve {
     this.danhGia,
   });
 
-  List<int> get danhSachGheParsed =>
-      danhSachGhe.split(',').map(int.parse).toList();
+  List<int> get danhSachGheParsed {
+    if (danhSachGhe.isEmpty) return [];
+    return danhSachGhe
+        .split(',')
+        .where((s) => s.trim().isNotEmpty)
+        .map((s) => int.tryParse(s.trim()) ?? 0)
+        .where((n) => n > 0)
+        .toList();
+  }
 
   Map<String, dynamic> toMap() => {
         'maVe': maVe, 'diemDi': diemDi, 'diemDen': diemDen,
@@ -218,6 +225,10 @@ class LichChay {
   final int soGheToiDa;
   final int soGheConLai;
   final String trangThai;
+  final String xeId;
+  final String taiXeId;
+  final String bienSoXe;
+  final String tenTaiXe;
 
   const LichChay({
     this.id,
@@ -230,6 +241,10 @@ class LichChay {
     required this.soGheToiDa,
     required this.soGheConLai,
     required this.trangThai,
+    this.xeId = '',
+    this.taiXeId = '',
+    this.bienSoXe = '',
+    this.tenTaiXe = '',
   });
 
   Map<String, dynamic> toMap() => {
@@ -237,6 +252,10 @@ class LichChay {
         'ngay': ngay, 'gio': gio, 'loaiXe': loaiXe,
         'soGheToiDa': soGheToiDa, 'soGheConLai': soGheConLai,
         'trangThai': trangThai,
+        if (xeId.isNotEmpty) 'xeId': xeId,
+        if (taiXeId.isNotEmpty) 'taiXeId': taiXeId,
+        if (bienSoXe.isNotEmpty) 'bienSoXe': bienSoXe,
+        if (tenTaiXe.isNotEmpty) 'tenTaiXe': tenTaiXe,
       };
 
   factory LichChay.fromDoc(DocumentSnapshot doc) {
@@ -252,6 +271,10 @@ class LichChay {
       soGheToiDa: (d['soGheToiDa'] as num?)?.toInt() ?? 0,
       soGheConLai: (d['soGheConLai'] as num?)?.toInt() ?? 0,
       trangThai: d['trangThai'] ?? 'cho',
+      xeId: d['xeId'] ?? '',
+      taiXeId: d['taiXeId'] ?? '',
+      bienSoXe: d['bienSoXe'] ?? '',
+      tenTaiXe: d['tenTaiXe'] ?? '',
     );
   }
 }
@@ -723,13 +746,16 @@ class CoSoDuLieu {
   }
 
   Future<List<Map<String, dynamic>>> layLichSuSoatTatCa(
-      {String? ngay}) async {
-    final n = DateTime.now();
-    final today = ngay ?? '${n.day}/${n.month}/${n.year}';
-    final q =
-        await _lichSuSoat.where('ngayLuu', isEqualTo: today).get();
+      {String? ngay, bool tatCa = false}) async {
+    Query q = _lichSuSoat;
+    if (!tatCa) {
+      final n = DateTime.now();
+      final today = ngay ?? '${n.day}/${n.month}/${n.year}';
+      q = q.where('ngayLuu', isEqualTo: today);
+    }
+    final snap = await q.get();
     final list =
-        q.docs.map((d) => d.data() as Map<String, dynamic>).toList();
+        snap.docs.map((d) => d.data() as Map<String, dynamic>).toList();
     list.sort((a, b) {
       final ta = (a['thoiGian'] ?? '').toString();
       final tb = (b['thoiGian'] ?? '').toString();
@@ -812,9 +838,37 @@ class CoSoDuLieu {
   Future<void> taoKhuyenMai(KhuyenMai km) async =>
       _khuyenMai.add(km.toMap());
 
+  Future<void> capNhatKhuyenMai(String id, KhuyenMai km) async =>
+      _khuyenMai.doc(id).update(km.toMap());
+
   Future<void> capNhatTrangThaiKhuyenMai(
           String id, String trangThai) async =>
       _khuyenMai.doc(id).update({'trangThai': trangThai});
+
+  Future<void> tangDaSuDungKhuyenMai(String id) async =>
+      _khuyenMai.doc(id).update({'daSuDung': FieldValue.increment(1)});
+
+  /// Kiểm tra và áp dụng mã khuyến mãi.
+  /// Trả về (giảm giá VNĐ, KhuyenMai) hoặc (0, null) nếu không hợp lệ.
+  Future<(int, KhuyenMai?)> apDungKhuyenMai(String ma, int giaGoc) async {
+    if (ma.isEmpty) return (0, null);
+    final q = await _khuyenMai
+        .where('ma', isEqualTo: ma.toUpperCase())
+        .get();
+    if (q.docs.isEmpty) return (0, null);
+    final km = KhuyenMai.fromDoc(q.docs.first);
+    if (km.trangThai != 'hoat_dong') return (0, null);
+    if (km.gioiHanSuDung > 0 && km.daSuDung >= km.gioiHanSuDung) return (0, null);
+    int giam;
+    if (km.loaiGiam == 'phan_tram') {
+      giam = (giaGoc * km.giaTriGiam / 100).round();
+      if (km.giaTriToiDa > 0 && giam > km.giaTriToiDa) giam = km.giaTriToiDa;
+    } else {
+      giam = km.giaTriGiam;
+    }
+    if (giam > giaGoc) giam = giaGoc;
+    return (giam, km);
+  }
 
   Future<void> xoaKhuyenMai(String id) async =>
       _khuyenMai.doc(id).delete();

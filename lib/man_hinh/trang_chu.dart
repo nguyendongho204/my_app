@@ -103,6 +103,7 @@ class _ManHinhTrangChuState extends State<ManHinhTrangChu>
   late AnimationController _hieuUngHien;
   late Animation<double> _doMo;
   Timer? _timerNhacNho;
+  String _thongBaoHeThong = '';
   // Set lưu id vé đã hiện thông báo để tránh hiện lại trong cùng phiên
   final Set<String> _daNhacVeId = {};
 
@@ -115,7 +116,10 @@ class _ManHinhTrangChuState extends State<ManHinhTrangChu>
     )..forward();
     _doMo = CurvedAnimation(parent: _hieuUngHien, curve: Curves.easeIn);
     // Kiểm tra nhắc nhở sau khi widget được gắn vào cây
-    WidgetsBinding.instance.addPostFrameCallback((_) => _kiemTraNhacNho());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _kiemTraNhacNho();
+      _taiThongBaoHeThong();
+    });
     // Kiểm tra lại mỗi 1 phút để bắt đúng khoảng giờ nhắc
     _timerNhacNho = Timer.periodic(
       const Duration(minutes: 1),
@@ -135,6 +139,17 @@ class _ManHinhTrangChuState extends State<ManHinhTrangChu>
     TrangThaiUngDung().removeListener(_onStateChange);
     _hieuUngHien.dispose();
     super.dispose();
+  }
+
+  Future<void> _taiThongBaoHeThong() async {
+    try {
+      final cfg = await CoSoDuLieu().layCauHinh();
+      if (!mounted) return;
+      setState(() {
+        _thongBaoHeThong =
+            (cfg['thong_bao_he_thong'] as String?)?.trim() ?? '';
+      });
+    } catch (_) {}
   }
 
   void _kiemTraNhacNho() {
@@ -466,6 +481,36 @@ class _ManHinhTrangChuState extends State<ManHinhTrangChu>
               opacity: _doMo,
               child: Column(
                 children: [
+                  if (_thongBaoHeThong.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF9800).withAlpha(30),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: const Color(0xFFFF9800).withAlpha(100)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(CupertinoIcons.exclamationmark_circle_fill,
+                                color: Color(0xFFFF9800), size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _thongBaoHeThong,
+                                style: const TextStyle(
+                                    color: Color(0xFFFF9800),
+                                    fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   _TimNhanhHome(onTap: widget.onTimTuyen),
                   const SizedBox(height: 28),
                   _KhuVucTrungTam(onTap: widget.onTimTuyen),

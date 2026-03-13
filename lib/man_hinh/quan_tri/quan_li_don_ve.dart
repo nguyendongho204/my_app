@@ -13,11 +13,19 @@ class _QuanLiDonVeState extends State<QuanLiDonVe> {
   List<Ve> _ds = [];
   String _loc = 'tat_ca';
   DateTime _ngay = DateTime.now();
+  String _tuKhoa = '';
+  final _tkCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _tai();
+  }
+
+  @override
+  void dispose() {
+    _tkCtrl.dispose();
+    super.dispose();
   }
 
   String get _ngayStr =>
@@ -37,8 +45,17 @@ class _QuanLiDonVeState extends State<QuanLiDonVe> {
     }
   }
 
-  List<Ve> get _hienThi =>
-      _loc == 'tat_ca' ? _ds : _ds.where((v) => v.trangThai == _loc).toList();
+  List<Ve> get _hienThi {
+    var ds = _loc == 'tat_ca' ? _ds : _ds.where((v) => v.trangThai == _loc).toList();
+    if (_tuKhoa.isNotEmpty) {
+      final tk = _tuKhoa.toLowerCase();
+      ds = ds.where((v) =>
+          v.maVe.toLowerCase().contains(tk) ||
+          v.diemDi.toLowerCase().contains(tk) ||
+          v.diemDen.toLowerCase().contains(tk)).toList();
+    }
+    return ds;
+  }
 
   Color _mauTT(String t) {
     switch (t) {
@@ -81,84 +98,104 @@ class _QuanLiDonVeState extends State<QuanLiDonVe> {
   }
 
   void _chiTiet(Ve ve) {
+    NguoiDung? _kh;
+    bool _dangTaiKH = ve.nguoiDungId.isNotEmpty;
+
     showCupertinoModalPopup(
       context: context,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: mauCardNen,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: EdgeInsets.only(
-          left: 20, right: 20, top: 16,
-          bottom: MediaQuery.of(context).padding.bottom + 24,
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36, height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                      color: mauCardVien,
-                      borderRadius: BorderRadius.circular(2)),
-                ),
-              ),
-              Row(
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setM) {
+          if (_dangTaiKH) {
+            _dangTaiKH = false;
+            CoSoDuLieu().layNguoiDungTheoId(ve.nguoiDungId).then((nd) {
+              if (ctx.mounted) setM(() => _kh = nd);
+            });
+          }
+          return Container(
+            decoration: const BoxDecoration(
+              color: mauCardNen,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: EdgeInsets.only(
+              left: 20, right: 20, top: 16,
+              bottom: MediaQuery.of(context).padding.bottom + 24,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(ve.maVe,
-                        style: const TextStyle(
-                            color: mauXanhSang,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _mauTT(ve.trangThai).withAlpha(40),
-                      borderRadius: BorderRadius.circular(10),
+                  Center(
+                    child: Container(
+                      width: 36, height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: mauCardVien,
+                          borderRadius: BorderRadius.circular(2)),
                     ),
-                    child: Text(_tenTT(ve.trangThai),
-                        style: TextStyle(
-                            color: _mauTT(ve.trangThai),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12)),
                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(ve.maVe,
+                            style: const TextStyle(
+                                color: mauXanhSang,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18)),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _mauTT(ve.trangThai).withAlpha(40),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(_tenTT(ve.trangThai),
+                            style: TextStyle(
+                                color: _mauTT(ve.trangThai),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (_kh != null) ...[
+                    _Row('Khách hàng', _kh!.ten),
+                    _Row('SĐT', _kh!.sdt),
+                    _Row('Email', _kh!.email),
+                  ] else if (ve.nguoiDungId.isNotEmpty) ...[
+                    _Row('Khách hàng', 'Đang tải...'),
+                  ],
+                  _Row('Tuyến', '${ve.diemDi} → ${ve.diemDen}'),
+                  _Row('Ngày đi', '${ve.ngay}  ${ve.gio}'),
+                  _Row('Loại xe', ve.loaiXe),
+                  _Row('Số ghế',
+                      (ve.danhSachGheParsed..sort()).join(', ')),
+                  _Row('Tổng tiền', _tien(ve.tongTien)),
+                  _Row('Ngày đặt', ve.ngayDat),
+                  const SizedBox(height: 20),
+                  if (ve.trangThai == 'cho') ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: CupertinoButton(
+                        color: mauDoHong,
+                        onPressed: () async {
+                          Navigator.of(context, rootNavigator: true).pop();
+                          await CoSoDuLieu()
+                              .capNhatTrangThaiVe(ve.id!, 'huy');
+                          _tai();
+                        },
+                        child: const Text('Hủy vé này',
+                            style: TextStyle(color: CupertinoColors.white)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 16),
-              _Row('Tuyến', '${ve.diemDi} → ${ve.diemDen}'),
-              _Row('Ngày đi', '${ve.ngay}  ${ve.gio}'),
-              _Row('Loại xe', ve.loaiXe),
-              _Row('Số ghế',
-                  (ve.danhSachGheParsed..sort()).join(', ')),
-              _Row('Tổng tiền', _tien(ve.tongTien)),
-              _Row('Ngày đặt', ve.ngayDat),
-              const SizedBox(height: 20),
-              if (ve.trangThai == 'cho') ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: CupertinoButton(
-                    color: mauDoHong,
-                    onPressed: () async {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      await CoSoDuLieu()
-                          .capNhatTrangThaiVe(ve.id!, 'huy');
-                      _tai();
-                    },
-                    child: const Text('Hủy vé này',
-                        style: TextStyle(color: CupertinoColors.white)),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -246,6 +283,31 @@ class _QuanLiDonVeState extends State<QuanLiDonVe> {
                     style: const TextStyle(
                         color: mauTextXam, fontSize: 13)),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+            child: CupertinoTextField(
+              controller: _tkCtrl,
+              placeholder: 'Tìm theo mã vé, điểm đi, điểm đến...',
+              placeholderStyle:
+                  const TextStyle(color: mauTextXam, fontSize: 13),
+              style:
+                  const TextStyle(color: mauTextTrang, fontSize: 13),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: mauCardNen,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: mauCardVien),
+              ),
+              prefix: const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(CupertinoIcons.search,
+                    color: mauTextXam, size: 16),
+              ),
+              clearButtonMode: OverlayVisibilityMode.editing,
+              onChanged: (v) => setState(() => _tuKhoa = v),
             ),
           ),
           SizedBox(
