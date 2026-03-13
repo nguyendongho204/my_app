@@ -64,7 +64,7 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
       if (i > 0 && (s.length - i) % 3 == 0) kq += '.';
       kq += s[i];
     }
-    return '${kq}đ';
+    return '$kqđ';
   }
 
   void _themTuyen() {
@@ -206,8 +206,6 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
 
   void _suaLich(LichChay l) {
     final gioCtrl = TextEditingController(text: l.gio);
-    final soGheCtrl = TextEditingController(text: l.soGheToiDa.toString());
-    String loaiXe = l.loaiXe;
     int xeIdx = _xeList.indexWhere((x) => x.id == l.xeId);
     int taixeIdx = _taixeList.indexWhere((tx) => tx.id == l.taiXeId);
     String? loi;
@@ -251,23 +249,17 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                   const SizedBox(height: 12),
                   _Nhap(ctrl: gioCtrl, ph: 'Giờ xuất phát (HH:mm)'),
                   const SizedBox(height: 10),
-                  _Nhap(ctrl: soGheCtrl, ph: 'Số ghế tối đa',
-                      kb: TextInputType.number),
-                  const SizedBox(height: 10),
-                  CupertinoSlidingSegmentedControl<String>(
-                    groupValue: loaiXe,
-                    backgroundColor: mauNenToi,
-                    children: const {
-                      'Ghế thường': Text('Ghế thường',
-                          style: TextStyle(fontSize: 11)),
-                      'Giường nằm': Text('Giường nằm',
-                          style: TextStyle(fontSize: 11)),
-                      'Limousine': Text('Limousine',
-                          style: TextStyle(fontSize: 11)),
-                    },
-                    onValueChanged: (v) {
-                      if (v != null) setM(() => loaiXe = v);
-                    },
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: mauNenToi,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: mauCardVien),
+                    ),
+                    child: const Text(
+                      'Loại xe: Ghế thường (16 chỗ)',
+                      style: TextStyle(color: mauTextTrang, fontSize: 14),
+                    ),
                   ),
                   if (_xeList.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -335,10 +327,8 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                     width: double.infinity,
                     child: CupertinoButton.filled(
                       onPressed: () async {
-                        final soGhe =
-                            int.tryParse(soGheCtrl.text.trim()) ?? 0;
-                        if (soGhe == 0 || gioCtrl.text.trim().isEmpty) {
-                          setM(() => loi = 'Nhập đầy đủ thông tin');
+                        if (gioCtrl.text.trim().isEmpty) {
+                          setM(() => loi = 'Nhập giờ xuất phát');
                           return;
                         }
                         final xeChon = (xePIdx > 0 && xePIdx - 1 < _xeList.length)
@@ -348,8 +338,8 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                         Navigator.of(context, rootNavigator: true).pop();
                         await CoSoDuLieu().capNhatLichChay(l.id!, {
                           'gio': gioCtrl.text.trim(),
-                          'loaiXe': loaiXe,
-                          'soGheToiDa': soGhe,
+                          'loaiXe': 'Ghế thường',
+                          'soGheToiDa': 16,
                           'xeId': xeChon?.id ?? '',
                           'taiXeId': txChon?.id ?? '',
                           'bienSoXe': xeChon?.bienSo ?? '',
@@ -426,8 +416,6 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
 
     int tuyenIdx = 0;
     final gioCtrl = TextEditingController(text: '07:00');
-    final soGheCtrl = TextEditingController();
-    String loaiXe = 'Ghế thường';
     int xePIdx = 0;
     int taixePIdx = 0;
     String? loi;
@@ -486,25 +474,17 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                 const SizedBox(height: 10),
                 _Nhap(ctrl: gioCtrl, ph: 'Giờ xuất phát (HH:mm)'),
                 const SizedBox(height: 10),
-                _Nhap(
-                    ctrl: soGheCtrl,
-                    ph: 'Số ghế tối đa',
-                    kb: TextInputType.number),
-                const SizedBox(height: 10),
-                CupertinoSlidingSegmentedControl<String>(
-                  groupValue: loaiXe,
-                  backgroundColor: mauNenToi,
-                  children: const {
-                    'Ghế thường': Text('Ghế thường',
-                        style: TextStyle(fontSize: 11)),
-                    'Giường nằm': Text('Giường nằm',
-                        style: TextStyle(fontSize: 11)),
-                    'Limousine':
-                        Text('Limousine', style: TextStyle(fontSize: 11)),
-                  },
-                  onValueChanged: (v) {
-                    if (v != null) setM(() => loaiXe = v);
-                  },
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: mauNenToi,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: mauCardVien),
+                  ),
+                  child: const Text(
+                    'Loại xe: Ghế thường (16 chỗ)',
+                    style: TextStyle(color: mauTextTrang, fontSize: 14),
+                  ),
                 ),
                 if (_xeList.isNotEmpty) ...[
                   const SizedBox(height: 10),
@@ -567,11 +547,8 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                   child: CupertinoButton.filled(
                     onPressed: () async {
                       final tuyen = _tuyenList[tuyenIdx];
-                      final soGhe =
-                          int.tryParse(soGheCtrl.text.trim()) ?? 0;
-                      if (soGhe == 0 ||
-                          gioCtrl.text.trim().isEmpty) {
-                        setM(() => loi = 'Nhập đầy đủ thông tin');
+                      if (gioCtrl.text.trim().isEmpty) {
+                        setM(() => loi = 'Nhập giờ xuất phát');
                         return;
                       }
                       final xeChon = (xePIdx > 0 && xePIdx - 1 < _xeList.length)
@@ -585,9 +562,9 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                         diemDen: tuyen.diemDen,
                         ngay: _ngayStr,
                         gio: gioCtrl.text.trim(),
-                        loaiXe: loaiXe,
-                        soGheToiDa: soGhe,
-                        soGheConLai: soGhe,
+                        loaiXe: 'Ghế thường',
+                        soGheToiDa: 16,
+                        soGheConLai: 16,
                         trangThai: 'cho',
                         xeId: xeChon?.id ?? '',
                         taiXeId: txChon?.id ?? '',
