@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/cupertino.dart';
 import '../cau_hinh/hang_so.dart';
 import '../widget_dung_chung/cac_widget.dart';
+import '../widget_dung_chung/chon_ngay_kieu_bao_cao.dart';
 import 'ket_qua_tuyen.dart';
 
 class TimTuyenXe extends StatefulWidget {
@@ -115,53 +116,17 @@ class _TimTuyenXeState extends State<TimTuyenXe> {
   void _chonNgay() {
     final now = DateTime.now();
     final minDate = DateTime(now.year, now.month, now.day);
-    DateTime ngayTam = _ngay.isBefore(minDate) ? minDate : _ngay;
-    showCupertinoModalPopup(
+    chonNgayKieuBaoCao(
       context: context,
-      builder: (popupCtx) => StatefulBuilder(
-        builder: (_, setLocal) => Container(
-          height: 280,
-          color: mauCardNen,
-          child: SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 14, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Chọn ngày đi',
-                          style: TextStyle(
-                              color: mauTextTrang,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          setState(() => _ngay = ngayTam);
-                          Navigator.of(popupCtx).pop();
-                        },
-                        child: const Text('Xong',
-                            style: TextStyle(color: mauXanhSang)),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoDatePicker(
-                    mode: CupertinoDatePickerMode.date,
-                    initialDateTime: ngayTam,
-                    minimumDate: minDate,
-                    maximumDate: minDate.add(const Duration(days: 30)),
-                    onDateTimeChanged: (d) => setLocal(() => ngayTam = d),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+      ngayBanDau: _ngay,
+      ngayToiThieu: minDate,
+      ngayToiDa: minDate.add(const Duration(days: 30)),
+      tieuDe: 'Chọn ngày đi',
+      nutApDung: 'Xong',
+    ).then((d) {
+      if (d == null || !mounted) return;
+      setState(() => _ngay = d);
+    });
   }
 
   void _timKiem() {

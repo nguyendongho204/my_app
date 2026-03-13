@@ -80,15 +80,8 @@ class Ve {
     this.danhGia,
   });
 
-  List<int> get danhSachGheParsed {
-    if (danhSachGhe.isEmpty) return [];
-    return danhSachGhe
-        .split(',')
-        .where((s) => s.trim().isNotEmpty)
-        .map((s) => int.tryParse(s.trim()) ?? 0)
-        .where((n) => n > 0)
-        .toList();
-  }
+  List<int> get danhSachGheParsed =>
+      danhSachGhe.split(',').map(int.parse).toList();
 
   Map<String, dynamic> toMap() => {
         'maVe': maVe, 'diemDi': diemDi, 'diemDen': diemDen,
@@ -841,10 +834,6 @@ class CoSoDuLieu {
   Future<void> capNhatKhuyenMai(String id, KhuyenMai km) async =>
       _khuyenMai.doc(id).update(km.toMap());
 
-  Future<void> capNhatTrangThaiKhuyenMai(
-          String id, String trangThai) async =>
-      _khuyenMai.doc(id).update({'trangThai': trangThai});
-
   Future<void> tangDaSuDungKhuyenMai(String id) async =>
       _khuyenMai.doc(id).update({'daSuDung': FieldValue.increment(1)});
 
@@ -856,19 +845,30 @@ class CoSoDuLieu {
         .where('ma', isEqualTo: ma.toUpperCase())
         .get();
     if (q.docs.isEmpty) return (0, null);
+
     final km = KhuyenMai.fromDoc(q.docs.first);
     if (km.trangThai != 'hoat_dong') return (0, null);
-    if (km.gioiHanSuDung > 0 && km.daSuDung >= km.gioiHanSuDung) return (0, null);
+    if (km.gioiHanSuDung > 0 && km.daSuDung >= km.gioiHanSuDung) {
+      return (0, null);
+    }
+
     int giam;
     if (km.loaiGiam == 'phan_tram') {
       giam = (giaGoc * km.giaTriGiam / 100).round();
-      if (km.giaTriToiDa > 0 && giam > km.giaTriToiDa) giam = km.giaTriToiDa;
+      if (km.giaTriToiDa > 0 && giam > km.giaTriToiDa) {
+        giam = km.giaTriToiDa;
+      }
     } else {
       giam = km.giaTriGiam;
     }
     if (giam > giaGoc) giam = giaGoc;
+    if (giam < 0) giam = 0;
     return (giam, km);
   }
+
+  Future<void> capNhatTrangThaiKhuyenMai(
+          String id, String trangThai) async =>
+      _khuyenMai.doc(id).update({'trangThai': trangThai});
 
   Future<void> xoaKhuyenMai(String id) async =>
       _khuyenMai.doc(id).delete();

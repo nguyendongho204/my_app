@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import '../../cau_hinh/hang_so.dart';
 import '../../du_lieu/co_so_du_lieu.dart';
+import '../../widget_dung_chung/chon_ngay_kieu_bao_cao.dart';
 
 class QuanLiTuyen extends StatefulWidget {
   const QuanLiTuyen({super.key});
@@ -686,37 +687,15 @@ class _QuanLiTuyenState extends State<QuanLiTuyen> {
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () async {
-                        DateTime tg = _ngayLich;
-                        await showCupertinoModalPopup(
+                        final d = await chonNgayKieuBaoCao(
                           context: context,
-                          builder: (_) => Container(
-                            height: 280,
-                            color: mauCardNen,
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 220,
-                                  child: CupertinoDatePicker(
-                                    mode:
-                                        CupertinoDatePickerMode.date,
-                                    initialDateTime: _ngayLich,
-                                    onDateTimeChanged: (d) => tg = d,
-                                  ),
-                                ),
-                                CupertinoButton(
-                                  onPressed: () {
-                                    setState(() => _ngayLich = tg);
-                                    Navigator.of(context,
-                                            rootNavigator: true)
-                                        .pop();
-                                    _tai();
-                                  },
-                                  child: const Text('Áp dụng'),
-                                ),
-                              ],
-                            ),
-                          ),
+                          ngayBanDau: _ngayLich,
+                          ngayToiDa: DateTime.now().add(const Duration(days: 365)),
+                          tieuDe: 'Chọn ngày lịch chạy',
                         );
+                        if (d == null || !mounted) return;
+                        setState(() => _ngayLich = d);
+                        _tai();
                       },
                       child: Row(
                         children: [

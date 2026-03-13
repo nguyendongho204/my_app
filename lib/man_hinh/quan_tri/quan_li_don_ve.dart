@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import '../../cau_hinh/hang_so.dart';
 import '../../du_lieu/co_so_du_lieu.dart';
+import '../../widget_dung_chung/chon_ngay_kieu_bao_cao.dart';
 
 class QuanLiDonVe extends StatefulWidget {
   const QuanLiDonVe({super.key});
@@ -234,36 +235,15 @@ class _QuanLiDonVeState extends State<QuanLiDonVe> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () async {
-                    DateTime tg = _ngay;
-                    await showCupertinoModalPopup(
+                    final d = await chonNgayKieuBaoCao(
                       context: context,
-                      builder: (_) => Container(
-                        height: 280,
-                        color: mauCardNen,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 220,
-                              child: CupertinoDatePicker(
-                                mode: CupertinoDatePickerMode.date,
-                                initialDateTime: _ngay,
-                                onDateTimeChanged: (d) => tg = d,
-                              ),
-                            ),
-                            CupertinoButton(
-                              onPressed: () {
-                                setState(() => _ngay = tg);
-                                Navigator.of(context,
-                                        rootNavigator: true)
-                                    .pop();
-                                _tai();
-                              },
-                              child: const Text('Áp dụng'),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ngayBanDau: _ngay,
+                      ngayToiDa: DateTime.now(),
+                      tieuDe: 'Chọn ngày lọc',
                     );
+                    if (d == null || !mounted) return;
+                    setState(() => _ngay = d);
+                    _tai();
                   },
                   child: Row(
                     children: [

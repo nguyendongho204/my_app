@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import '../../cau_hinh/hang_so.dart';
 import '../../du_lieu/co_so_du_lieu.dart';
+import '../../widget_dung_chung/chon_ngay_kieu_bao_cao.dart';
 
 class KhuyenMaiScreen extends StatefulWidget {
   const KhuyenMaiScreen({super.key});
@@ -118,27 +119,13 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () async {
-                            DateTime tg = ngayBD ?? DateTime.now();
-                            await showCupertinoModalPopup(
+                            final d = await chonNgayKieuBaoCao(
                               context: context,
-                              builder: (_) => Container(
-                                height: 280, color: mauCardNen,
-                                child: Column(children: [
-                                  SizedBox(height: 220,
-                                    child: CupertinoDatePicker(
-                                      mode: CupertinoDatePickerMode.date,
-                                      initialDateTime: tg,
-                                      onDateTimeChanged: (d) => tg = d,
-                                    )),
-                                  CupertinoButton(
-                                    onPressed: () {
-                                      setM(() => ngayBD = tg);
-                                      Navigator.of(context, rootNavigator: true).pop();
-                                    },
-                                    child: const Text('Áp dụng')),
-                                ]),
-                              ),
+                              ngayBanDau: ngayBD ?? DateTime.now(),
+                              ngayToiDa: DateTime.now().add(const Duration(days: 3650)),
+                              tieuDe: 'Chọn ngày bắt đầu',
                             );
+                            if (d != null) setM(() => ngayBD = d);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(12),
@@ -162,27 +149,13 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () async {
-                            DateTime tg = ngayKT ?? DateTime.now();
-                            await showCupertinoModalPopup(
+                            final d = await chonNgayKieuBaoCao(
                               context: context,
-                              builder: (_) => Container(
-                                height: 280, color: mauCardNen,
-                                child: Column(children: [
-                                  SizedBox(height: 220,
-                                    child: CupertinoDatePicker(
-                                      mode: CupertinoDatePickerMode.date,
-                                      initialDateTime: tg,
-                                      onDateTimeChanged: (d) => tg = d,
-                                    )),
-                                  CupertinoButton(
-                                    onPressed: () {
-                                      setM(() => ngayKT = tg);
-                                      Navigator.of(context, rootNavigator: true).pop();
-                                    },
-                                    child: const Text('Áp dụng')),
-                                ]),
-                              ),
+                              ngayBanDau: ngayKT ?? DateTime.now(),
+                              ngayToiDa: DateTime.now().add(const Duration(days: 3650)),
+                              tieuDe: 'Chọn ngày kết thúc',
                             );
+                            if (d != null) setM(() => ngayKT = d);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(12),
@@ -325,26 +298,13 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () async {
-                            DateTime tg = ngayBD ?? DateTime.now();
-                            await showCupertinoModalPopup(
+                            final d = await chonNgayKieuBaoCao(
                               context: context,
-                              builder: (_) => Container(
-                                height: 280, color: mauCardNen,
-                                child: Column(children: [
-                                  SizedBox(height: 220, child: CupertinoDatePicker(
-                                    mode: CupertinoDatePickerMode.date,
-                                    initialDateTime: tg,
-                                    onDateTimeChanged: (d) => tg = d,
-                                  )),
-                                  CupertinoButton(
-                                    onPressed: () {
-                                      setM(() => ngayBD = tg);
-                                      Navigator.of(context, rootNavigator: true).pop();
-                                    },
-                                    child: const Text('Áp dụng')),
-                                ]),
-                              ),
+                              ngayBanDau: ngayBD ?? DateTime.now(),
+                              ngayToiDa: DateTime.now().add(const Duration(days: 3650)),
+                              tieuDe: 'Chọn ngày bắt đầu',
                             );
+                            if (d != null) setM(() => ngayBD = d);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(12),
@@ -367,26 +327,13 @@ class _KhuyenMaiScreenState extends State<KhuyenMaiScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () async {
-                            DateTime tg = ngayKT ?? DateTime.now();
-                            await showCupertinoModalPopup(
+                            final d = await chonNgayKieuBaoCao(
                               context: context,
-                              builder: (_) => Container(
-                                height: 280, color: mauCardNen,
-                                child: Column(children: [
-                                  SizedBox(height: 220, child: CupertinoDatePicker(
-                                    mode: CupertinoDatePickerMode.date,
-                                    initialDateTime: tg,
-                                    onDateTimeChanged: (d) => tg = d,
-                                  )),
-                                  CupertinoButton(
-                                    onPressed: () {
-                                      setM(() => ngayKT = tg);
-                                      Navigator.of(context, rootNavigator: true).pop();
-                                    },
-                                    child: const Text('Áp dụng')),
-                                ]),
-                              ),
+                              ngayBanDau: ngayKT ?? DateTime.now(),
+                              ngayToiDa: DateTime.now().add(const Duration(days: 3650)),
+                              tieuDe: 'Chọn ngày kết thúc',
                             );
+                            if (d != null) setM(() => ngayKT = d);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(12),
