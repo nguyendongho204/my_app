@@ -51,9 +51,9 @@ Future<void> _taoSeedData() async {
   final xe = await db.layTatCaXe();
   if (xe.isEmpty) {
     final ds = [
-      Xe(bienSo: '43A-123.45', loaiXe: 'Ghế thường', soGhe: 30, trangThai: 'san_sang'),
-      Xe(bienSo: '43B-678.90', loaiXe: 'Giường nằm', soGhe: 24, trangThai: 'san_sang'),
-      Xe(bienSo: '43C-112.23', loaiXe: 'Limousine', soGhe: 18, trangThai: 'san_sang'),
+      Xe(bienSo: '43A-123.45', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
+      Xe(bienSo: '43B-678.90', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
+      Xe(bienSo: '43C-112.23', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
     ];
     for (final x in ds) {
       await db.taoXe(x);
@@ -81,8 +81,8 @@ Future<void> _taoSeedData() async {
     final tuyenList = await db.layTatCaTuyen();
     if (tuyenList.isNotEmpty) {
       final gioList = ['07:00', '09:30', '13:00', '15:30'];
-      final loaiList = ['Ghế thường', 'Ghế thường', 'Giường nằm', 'Limousine'];
-      final soGheList = [30, 30, 24, 18];
+      final loaiList = ['Ghế thường', 'Ghế thường', 'Ghế thường', 'Ghế thường'];
+      final soGheList = [16, 16, 16, 16];
       for (int i = 0; i < tuyenList.length && i < 3; i++) {
         final t = tuyenList[i];
         for (int j = 0; j < gioList.length; j++) {

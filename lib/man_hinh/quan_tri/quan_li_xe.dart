@@ -34,8 +34,6 @@ class _QuanLiXeState extends State<QuanLiXe> {
 
   void _sua(Xe x) {
     final bienSoCtrl = TextEditingController(text: x.bienSo);
-    final soGheCtrl = TextEditingController(text: x.soGhe.toString());
-    String loaiXe = x.loaiXe;
     String? loi;
 
     showCupertinoModalPopup(
@@ -76,17 +74,17 @@ class _QuanLiXeState extends State<QuanLiXe> {
                 const SizedBox(height: 16),
                 _F(ctrl: bienSoCtrl, ph: 'Biển số xe'),
                 const SizedBox(height: 10),
-                _F(ctrl: soGheCtrl, ph: 'Số ghế', kb: TextInputType.number),
-                const SizedBox(height: 10),
-                CupertinoSlidingSegmentedControl<String>(
-                  groupValue: loaiXe,
-                  backgroundColor: mauNenToi,
-                  children: const {
-                    'Ghế thường': Text('Ghế thường', style: TextStyle(fontSize: 11)),
-                    'Giường nằm': Text('Giường nằm', style: TextStyle(fontSize: 11)),
-                    'Limousine': Text('Limousine', style: TextStyle(fontSize: 11)),
-                  },
-                  onValueChanged: (v) { if (v != null) setM(() => loaiXe = v); },
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: mauNenToi,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: mauCardVien),
+                  ),
+                  child: const Text(
+                    'Loại xe: Ghế thường (16 chỗ)',
+                    style: TextStyle(color: mauTextTrang, fontSize: 14),
+                  ),
                 ),
                 if (loi != null) ...[
                   const SizedBox(height: 8),
@@ -98,14 +96,13 @@ class _QuanLiXeState extends State<QuanLiXe> {
                   child: CupertinoButton.filled(
                     onPressed: () async {
                       final bs = bienSoCtrl.text.trim();
-                      final sg = int.tryParse(soGheCtrl.text.trim()) ?? 0;
-                      if (bs.isEmpty || sg == 0) {
-                        setM(() => loi = 'Vui lòng nhập đầy đủ');
+                      if (bs.isEmpty) {
+                        setM(() => loi = 'Vui lòng nhập biển số');
                         return;
                       }
                       Navigator.of(context, rootNavigator: true).pop();
                       await CoSoDuLieu().capNhatXe(x.id!, {
-                        'bienSo': bs, 'loaiXe': loaiXe, 'soGhe': sg,
+                        'bienSo': bs, 'loaiXe': 'Ghế thường', 'soGhe': 16,
                       });
                       _tai();
                     },
@@ -122,8 +119,6 @@ class _QuanLiXeState extends State<QuanLiXe> {
 
   void _them() {
     final bienSoCtrl = TextEditingController();
-    final soGheCtrl = TextEditingController();
-    String loaiXe = 'Ghế thường';
     String? loi;
 
     showCupertinoModalPopup(
@@ -169,25 +164,17 @@ class _QuanLiXeState extends State<QuanLiXe> {
                 const SizedBox(height: 16),
                 _F(ctrl: bienSoCtrl, ph: 'Biển số xe (VD: 65A-12345)'),
                 const SizedBox(height: 10),
-                _F(
-                    ctrl: soGheCtrl,
-                    ph: 'Số ghế',
-                    kb: TextInputType.number),
-                const SizedBox(height: 10),
-                CupertinoSlidingSegmentedControl<String>(
-                  groupValue: loaiXe,
-                  backgroundColor: mauNenToi,
-                  children: const {
-                    'Ghế thường': Text('Ghế thường',
-                        style: TextStyle(fontSize: 11)),
-                    'Giường nằm': Text('Giường nằm',
-                        style: TextStyle(fontSize: 11)),
-                    'Limousine': Text('Limousine',
-                        style: TextStyle(fontSize: 11)),
-                  },
-                  onValueChanged: (v) {
-                    if (v != null) setM(() => loaiXe = v);
-                  },
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: mauNenToi,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: mauCardVien),
+                  ),
+                  child: const Text(
+                    'Loại xe: Ghế thường (16 chỗ)',
+                    style: TextStyle(color: mauTextTrang, fontSize: 14),
+                  ),
                 ),
                 if (loi != null) ...[
                   const SizedBox(height: 8),
@@ -201,17 +188,15 @@ class _QuanLiXeState extends State<QuanLiXe> {
                   child: CupertinoButton.filled(
                     onPressed: () async {
                       final bs = bienSoCtrl.text.trim();
-                      final sg =
-                          int.tryParse(soGheCtrl.text.trim()) ?? 0;
-                      if (bs.isEmpty || sg == 0) {
-                        setM(() => loi = 'Vui lòng nhập đầy đủ');
+                      if (bs.isEmpty) {
+                        setM(() => loi = 'Vui lòng nhập biển số');
                         return;
                       }
                       Navigator.of(context, rootNavigator: true).pop();
                       await CoSoDuLieu().taoXe(Xe(
                           bienSo: bs,
-                          loaiXe: loaiXe,
-                          soGhe: sg,
+                          loaiXe: 'Ghế thường',
+                          soGhe: 16,
                           trangThai: 'san_sang'));
                       _tai();
                     },
@@ -418,14 +403,12 @@ class _QuanLiXeState extends State<QuanLiXe> {
 class _F extends StatelessWidget {
   final TextEditingController ctrl;
   final String ph;
-  final TextInputType? kb;
-  const _F({required this.ctrl, required this.ph, this.kb});
+  const _F({required this.ctrl, required this.ph});
 
   @override
   Widget build(BuildContext context) => CupertinoTextField(
         controller: ctrl,
         placeholder: ph,
-        keyboardType: kb,
         placeholderStyle:
             const TextStyle(color: mauTextXam, fontSize: 14),
         style: const TextStyle(color: mauTextTrang, fontSize: 14),
