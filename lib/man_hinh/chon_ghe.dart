@@ -31,10 +31,10 @@ class _ChonGheState extends State<ChonGhe> {
   @override
   void initState() {
     super.initState();
-    final gheTrong = (widget.chuyen['gheTrong'] as int).clamp(0, 15);
-    final soDaDat = 15 - gheTrong;
+    final gheTrong = (widget.chuyen['gheTrong'] as int).clamp(0, 16);
+    final soDaDat = 16 - gheTrong;
     _gheDaDat = {};
-    for (final s in [3, 7, 5, 11, 9, 14, 1, 13, 6, 2, 12, 10, 4, 8, 15]) {
+    for (final s in [3, 7, 5, 11, 9, 14, 1, 13, 6, 2, 12, 10, 4, 8, 15, 16]) {
       if (_gheDaDat.length >= soDaDat) break;
       _gheDaDat.add(s);
     }
@@ -386,7 +386,7 @@ class _SoDoXe extends StatelessWidget {
           }),
           Container(height: 0.5, color: mauCardVien),
           const SizedBox(height: 8),
-          // Hàng cuối: Ghế 14 và 15 (giữa xe)
+          // Hàng cuối: Ghế 14, 15 và 16 (giữa xe)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -396,6 +396,8 @@ class _SoDoXe extends StatelessWidget {
               _ghe(14),
               const SizedBox(width: 20), // lối đi
               _ghe(15),
+              const SizedBox(width: 4),
+              _ghe(16),
               const SizedBox(width: 4),
               const SizedBox(width: 44), // ô trống cửa sổ
             ],
