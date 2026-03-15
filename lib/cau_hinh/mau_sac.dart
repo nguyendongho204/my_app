@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Bảng màu Material dự phòng, dùng cho các màn hình/widget chưa chuyển hoàn toàn sang hằng số Cupertino.
 class MauSac {
   // Mau nen chinh - toi nhu Shazam
   static const Color nenToi = Color(0xFF0A0E21);
@@ -40,8 +41,8 @@ class MauSac {
 
   // Mau accent
   static const Color cam = Color(0xFFFF6F00);
-  static const Color xanh_la = Color(0xFF00C853);
-  static const Color do_hong = Color(0xFFE91E63);
+  static const Color xanhLa = Color(0xFF00C853);
+  static const Color doHong = Color(0xFFE91E63);
 
   // Mau card/surface
   static const Color cardNen = Color(0xFF1A2040);

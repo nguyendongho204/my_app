@@ -3,6 +3,21 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
+const String loaiXeMacDinh = 'thuong';
+
+String chuanHoaLoaiXe(String? giaTri) {
+  // Ứng dụng chỉ hỗ trợ 1 loại xe duy nhất.
+  return loaiXeMacDinh;
+}
+
+Map<String, dynamic> chuanHoaDuLieuLoaiXe(Map<String, dynamic> data) {
+  final normalized = Map<String, dynamic>.from(data);
+  if (normalized.containsKey('loaiXe')) {
+    normalized['loaiXe'] = chuanHoaLoaiXe(normalized['loaiXe']?.toString());
+  }
+  return normalized;
+}
+
 // ===================== MODELS =====================
 
 class NguoiDung {
@@ -87,7 +102,7 @@ class Ve {
         'maVe': maVe, 'diemDi': diemDi, 'diemDen': diemDen,
         'gio': gio, 'ngay': ngay, 'danhSachGhe': danhSachGhe,
         'tongTien': tongTien, 'trangThai': trangThai,
-        'loaiXe': loaiXe, 'ngayDat': ngayDat, 'nguoiDungId': nguoiDungId,
+      'loaiXe': chuanHoaLoaiXe(loaiXe), 'ngayDat': ngayDat, 'nguoiDungId': nguoiDungId,
         if (danhGia != null) 'danhGia': danhGia,
       };
 
@@ -103,7 +118,7 @@ class Ve {
       danhSachGhe: d['danhSachGhe'] ?? '',
       tongTien: (d['tongTien'] as num?)?.toInt() ?? 0,
       trangThai: d['trangThai'] ?? 'cho',
-      loaiXe: d['loaiXe'] ?? '',
+      loaiXe: chuanHoaLoaiXe(d['loaiXe']?.toString()),
       ngayDat: d['ngayDat'] ?? '',
       nguoiDungId: d['nguoiDungId'] ?? '',
       danhGia: (d['danhGia'] as num?)?.toInt(),
@@ -242,7 +257,7 @@ class LichChay {
 
   Map<String, dynamic> toMap() => {
         'tuyenId': tuyenId, 'diemDi': diemDi, 'diemDen': diemDen,
-        'ngay': ngay, 'gio': gio, 'loaiXe': loaiXe,
+      'ngay': ngay, 'gio': gio, 'loaiXe': chuanHoaLoaiXe(loaiXe),
         'soGheToiDa': soGheToiDa, 'soGheConLai': soGheConLai,
         'trangThai': trangThai,
         if (xeId.isNotEmpty) 'xeId': xeId,
@@ -260,7 +275,7 @@ class LichChay {
       diemDen: d['diemDen'] ?? '',
       ngay: d['ngay'] ?? '',
       gio: d['gio'] ?? '',
-      loaiXe: d['loaiXe'] ?? '',
+      loaiXe: chuanHoaLoaiXe(d['loaiXe']?.toString()),
       soGheToiDa: (d['soGheToiDa'] as num?)?.toInt() ?? 0,
       soGheConLai: (d['soGheConLai'] as num?)?.toInt() ?? 0,
       trangThai: d['trangThai'] ?? 'cho',
@@ -288,7 +303,7 @@ class Xe {
   });
 
   Map<String, dynamic> toMap() => {
-        'bienSo': bienSo, 'loaiXe': loaiXe,
+      'bienSo': bienSo, 'loaiXe': chuanHoaLoaiXe(loaiXe),
         'soGhe': soGhe, 'trangThai': trangThai,
       };
 
@@ -297,7 +312,7 @@ class Xe {
     return Xe(
       id: doc.id,
       bienSo: d['bienSo'] ?? '',
-      loaiXe: d['loaiXe'] ?? '',
+      loaiXe: chuanHoaLoaiXe(d['loaiXe']?.toString()),
       soGhe: (d['soGhe'] as num?)?.toInt() ?? 0,
       trangThai: d['trangThai'] ?? 'san_sang',
     );
@@ -445,6 +460,7 @@ class KhieuNai {
 // ===================== DATABASE HELPER =====================
 
 class CoSoDuLieu {
+  // Singleton để toàn app dùng chung một điểm truy cập Firestore.
   static final CoSoDuLieu _instance = CoSoDuLieu._internal();
   factory CoSoDuLieu() => _instance;
   CoSoDuLieu._internal();
@@ -520,6 +536,7 @@ class CoSoDuLieu {
     required String sdt,
     required String matKhau,
   }) async {
+    // So khớp bằng hash để không lưu/so sánh mật khẩu dạng thô.
     final hash = hashMatKhau(matKhau);
     final q = await _nguoiDung.where('sdt', isEqualTo: sdt).get();
     if (q.docs.isEmpty) return null;
@@ -538,11 +555,11 @@ class CoSoDuLieu {
   // ---------- VE ----------
 
   Future<Ve> datVe(Ve ve) async {
-    final doc = await _ve.add(ve.toMap());
+    final doc = await _ve.add(chuanHoaDuLieuLoaiXe(ve.toMap()));
     return Ve(
       id: doc.id, maVe: ve.maVe, diemDi: ve.diemDi, diemDen: ve.diemDen,
       gio: ve.gio, ngay: ve.ngay, danhSachGhe: ve.danhSachGhe,
-      tongTien: ve.tongTien, trangThai: ve.trangThai, loaiXe: ve.loaiXe,
+      tongTien: ve.tongTien, trangThai: ve.trangThai, loaiXe: chuanHoaLoaiXe(ve.loaiXe),
       ngayDat: ve.ngayDat, nguoiDungId: ve.nguoiDungId,
     );
   }
@@ -663,7 +680,7 @@ class CoSoDuLieu {
       'ngay': ve.ngay,
       'gio': ve.gio,
       'danhSachGhe': ve.danhSachGhe,
-      'loaiXe': ve.loaiXe,
+      'loaiXe': chuanHoaLoaiXe(ve.loaiXe),
       'ghiChu': ghiChu,
       'thoiGian': DateTime.now().toIso8601String(),
       'ngayLuu': '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
@@ -785,10 +802,10 @@ class CoSoDuLieu {
   }
 
   Future<void> taoLichChay(LichChay lich) async =>
-      _lichChay.add(lich.toMap());
+      _lichChay.add(chuanHoaDuLieuLoaiXe(lich.toMap()));
 
-  Future<void> capNhatLichChay(String id, Map<String, dynamic> data) async =>
-      _lichChay.doc(id).update(data);
+    Future<void> capNhatLichChay(String id, Map<String, dynamic> data) async =>
+      _lichChay.doc(id).update(chuanHoaDuLieuLoaiXe(data));
 
   Future<void> xoaLichChay(String id) async =>
       _lichChay.doc(id).delete();
@@ -800,10 +817,10 @@ class CoSoDuLieu {
     return q.docs.map((d) => Xe.fromDoc(d)).toList();
   }
 
-  Future<void> taoXe(Xe xe) async => _xe.add(xe.toMap());
+    Future<void> taoXe(Xe xe) async => _xe.add(chuanHoaDuLieuLoaiXe(xe.toMap()));
 
   Future<void> capNhatXe(String id, Map<String, dynamic> data) async =>
-      _xe.doc(id).update(data);
+      _xe.doc(id).update(chuanHoaDuLieuLoaiXe(data));
 
   Future<void> xoaXe(String id) async => _xe.doc(id).delete();
 
@@ -852,6 +869,7 @@ class CoSoDuLieu {
       return (0, null);
     }
 
+    // Tính giảm giá theo loại phần trăm hoặc số tiền cố định.
     int giam;
     if (km.loaiGiam == 'phan_tram') {
       giam = (giaGoc * km.giaTriGiam / 100).round();
@@ -928,6 +946,7 @@ class CoSoDuLieu {
 // ===================== SESSION =====================
 
 class TrangThaiUngDung extends ChangeNotifier {
+  // Singleton trạng thái phiên để các màn hình có thể nghe thay đổi đồng bộ.
   static final TrangThaiUngDung _instance = TrangThaiUngDung._internal();
   factory TrangThaiUngDung() => _instance;
   TrangThaiUngDung._internal();
@@ -949,7 +968,7 @@ class TrangThaiUngDung extends ChangeNotifier {
     _tenGanDay = nd.ten;
     _danhSachVe = [];
     notifyListeners();
-    // Tu dong tai danh sach ve sau khi dang nhap
+    // Tự động đồng bộ danh sách vé ngay sau khi đăng nhập thành công.
     CoSoDuLieu().layDanhSachVe(nd.id!).then((list) {
       _danhSachVe = List.from(list);
       notifyListeners();
@@ -1020,6 +1039,7 @@ class TrangThaiUngDung extends ChangeNotifier {
 
   /// Tự động kiểm tra và đánh dấu vé bỏ lỡ (quá 4 giờ sau khởi hành, chưa lên xe)
   Future<void> kiemTraBoLo() async {
+    // Vé chưa đi và quá 4 giờ sau giờ khởi hành sẽ bị đánh dấu bỏ lỡ.
     final cutoff = DateTime.now().subtract(const Duration(hours: 4));
     final veBoLo = _danhSachVe.where((v) {
       if (v.trangThai != 'cho') return false;

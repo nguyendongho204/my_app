@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-// Mau sac toan app
+// Bảng màu dùng chung cho toàn bộ giao diện Cupertino trong ứng dụng.
 const Color mauNenToi = Color(0xFF0A0E21);
 const Color mauNenToi2 = Color(0xFF0D1B3E);
 const Color mauNenTim = Color(0xFF1A0A2E);
@@ -17,7 +17,7 @@ const Color mauXanhLa = Color(0xFF00C853);
 const Color mauDoHong = Color(0xFFE91E63);
 const Color mauThanhDieuHuong = Color(0xFF0D1228);
 
-// Gradient
+// Các gradient nền/chính để tái sử dụng nhất quán giữa các màn hình.
 const LinearGradient gradientChinh = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,

@@ -3,6 +3,7 @@ import 'mau_sac.dart';
 
 class ChuDe {
   static ThemeData layTema() {
+    // Theme Material dùng cho các thành phần còn phụ thuộc ThemeData trong app.
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: MauSac.nenToi,

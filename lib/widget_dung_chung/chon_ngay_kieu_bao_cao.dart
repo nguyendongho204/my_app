@@ -10,12 +10,14 @@ Future<DateTime?> chonNgayKieuBaoCao({
   String tieuDe = 'Chọn ngày',
   String nutApDung = 'Áp dụng',
 }) async {
+  // Chuẩn hóa về đầu ngày để so sánh mốc min/max không lệch theo giờ/phút.
   DateTime boGio(DateTime d) => DateTime(d.year, d.month, d.day);
 
   final minD = ngayToiThieu != null ? boGio(ngayToiThieu) : DateTime(2000, 1, 1);
   final maxD = ngayToiDa != null ? boGio(ngayToiDa) : DateTime.now();
 
   DateTime kepNgay(DateTime d) {
+    // Ép ngày luôn nằm trong khoảng cho phép trước khi đổ vào picker.
     final x = boGio(d);
     if (x.isBefore(minD)) return minD;
     if (x.isAfter(maxD)) return maxD;
@@ -41,6 +43,7 @@ Future<DateTime?> chonNgayKieuBaoCao({
     context: context,
     builder: (_) => StatefulBuilder(
       builder: (ctx, setM) {
+        // Giới hạn tháng/ngày theo năm đang chọn để tránh tạo ngày không hợp lệ.
         final minThang = nam == minNam ? minD.month : 1;
         final maxThang = nam == maxNam ? maxD.month : 12;
 

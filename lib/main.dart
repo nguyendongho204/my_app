@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:device_preview/device_preview.dart';
 import 'firebase_options.dart';
-import 'man_hinh/trang_chu.dart';
+import 'tinh_nang/trang_chu/giao_dien/man_hinh/trang_chu.dart';
 import 'du_lieu/co_so_du_lieu.dart';
 
 Future<void> _taoTaiKhoanTest() async {
@@ -51,9 +51,9 @@ Future<void> _taoSeedData() async {
   final xe = await db.layTatCaXe();
   if (xe.isEmpty) {
     final ds = [
-      Xe(bienSo: '43A-123.45', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
-      Xe(bienSo: '43B-678.90', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
-      Xe(bienSo: '43C-112.23', loaiXe: 'Ghế thường', soGhe: 16, trangThai: 'san_sang'),
+      Xe(bienSo: '43A-123.45', loaiXe: loaiXeMacDinh, soGhe: 16, trangThai: 'san_sang'),
+      Xe(bienSo: '43B-678.90', loaiXe: loaiXeMacDinh, soGhe: 16, trangThai: 'san_sang'),
+      Xe(bienSo: '43C-112.23', loaiXe: loaiXeMacDinh, soGhe: 16, trangThai: 'san_sang'),
     ];
     for (final x in ds) {
       await db.taoXe(x);
@@ -81,7 +81,6 @@ Future<void> _taoSeedData() async {
     final tuyenList = await db.layTatCaTuyen();
     if (tuyenList.isNotEmpty) {
       final gioList = ['07:00', '09:30', '13:00', '15:30'];
-      final loaiList = ['Ghế thường', 'Ghế thường', 'Ghế thường', 'Ghế thường'];
       final soGheList = [16, 16, 16, 16];
       for (int i = 0; i < tuyenList.length && i < 3; i++) {
         final t = tuyenList[i];
@@ -92,7 +91,7 @@ Future<void> _taoSeedData() async {
             diemDen: t.diemDen,
             ngay: homNay,
             gio: gioList[j],
-            loaiXe: loaiList[j],
+            loaiXe: loaiXeMacDinh,
             soGheToiDa: soGheList[j],
             soGheConLai: soGheList[j],
             trangThai: 'cho',

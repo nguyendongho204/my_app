@@ -54,6 +54,7 @@ class _VongTronPulseState extends State<VongTronPulse>
       CurvedAnimation(parent: _bdk2, curve: Curves.easeOut),
     );
 
+    // Làn sóng thứ 2 trễ pha để hiệu ứng pulse tự nhiên hơn.
     Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted) _bdk2.repeat();
     });
@@ -300,9 +301,11 @@ class NutGradient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hỗ trợ trạng thái disabled khi onNhan = null bằng giảm độ mờ.
     return GestureDetector(
       onTap: onNhan,
       child: Container(
+        // Giữ độ tương phản tốt giữa các màn hình sáng/tối nhờ gradient mặc định.
         width: chieuRong,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
         decoration: BoxDecoration(
