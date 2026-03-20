@@ -5,6 +5,7 @@ import '../../../../widget_dung_chung/cac_widget.dart';
 import '../../../dang_nhap/giao_dien/man_hinh/dang_nhap.dart';
 import '../../../dang_nhap/giao_dien/man_hinh/dang_nhap_nhan_vien.dart';
 import '../../../dang_nhap/giao_dien/man_hinh/dang_nhap_admin.dart';
+import 'vi_tai_khoan.dart';
 
 class TaiKhoan extends StatefulWidget {
   const TaiKhoan({super.key});
@@ -714,6 +715,75 @@ class _TaiKhoanState extends State<TaiKhoan> {
                           const SizedBox(width: 10),
                           _CardThongKe(so: _tinhNamSuDung(), nhan: 'Năm sử dụng'),
                         ],
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                    // Vi dien tu
+                    Builder(builder: (context) {
+                      final soDuVi = nd?.sotien ?? 0.0;
+                      return GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const ViTaiKhoan(),
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(51),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  CupertinoIcons.creditcard,
+                                  color: CupertinoColors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Ví Điện Tử',
+                                      style: TextStyle(
+                                        color: CupertinoColors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      soDuVi == 0
+                                          ? 'Nhấn để nạp tiền'
+                                          : '${(soDuVi / 1000).toStringAsFixed(0)}k',
+                                      style: TextStyle(
+                                        color: Colors.white.withAlpha(179),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                CupertinoIcons.chevron_right,
+                                color: CupertinoColors.white,
+                                size: 18,
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     }),
                     const SizedBox(height: 20),

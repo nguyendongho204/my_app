@@ -28,6 +28,7 @@ class NguoiDung {
   final String matKhau;
   final String ngayTao;
   final bool biKhoa;
+  final double sotien;
 
   const NguoiDung({
     this.id,
@@ -37,17 +38,20 @@ class NguoiDung {
     required this.matKhau,
     required this.ngayTao,
     this.biKhoa = false,
+    this.sotien = 0.0,
   });
 
-  NguoiDung copyWith({String? id}) => NguoiDung(
+  NguoiDung copyWith({String? id, double? sotien}) => NguoiDung(
         id: id ?? this.id,
         ten: ten, sdt: sdt, email: email,
         matKhau: matKhau, ngayTao: ngayTao, biKhoa: biKhoa,
+        sotien: sotien ?? this.sotien,
       );
 
   Map<String, dynamic> toMap() => {
         'ten': ten, 'sdt': sdt, 'email': email,
         'matKhau': matKhau, 'ngayTao': ngayTao, 'biKhoa': biKhoa,
+        'sotien': sotien,
       };
 
   factory NguoiDung.fromDoc(DocumentSnapshot doc) {
@@ -60,6 +64,7 @@ class NguoiDung {
       matKhau: d['matKhau'] ?? '',
       ngayTao: d['ngayTao'] ?? '',
       biKhoa: d['biKhoa'] == true,
+      sotien: (d['sotien'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -453,6 +458,134 @@ class KhieuNai {
       ngayTao: d['ngayTao'] ?? '',
       phanHoi: d['phanHoi'] ?? '',
       ngayPhanHoi: d['ngayPhanHoi'] ?? '',
+    );
+  }
+}
+
+// ===================== WALLET MODELS =====================
+
+class GiaoDich {
+  final String? id;
+  final String userId;
+  final String loai; // 'nap', 'thanh_toan', 'hoan_tien'
+  final double soTien;
+  final String phuongThuc; // 'momo', 'zalopay', 'vnpay', 'tk_ngan_hang', 'the_ngan_hang'
+  final String trangThai; // 'dang_xu_ly', 'thanh_cong', 'that_bai'
+  final String ngayTao;
+  final String moTa;
+  final String? maVe; // Cho thanh_toan và hoan_tien
+
+  const GiaoDich({
+    this.id,
+    required this.userId,
+    required this.loai,
+    required this.soTien,
+    required this.phuongThuc,
+    required this.trangThai,
+    required this.ngayTao,
+    required this.moTa,
+    this.maVe,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId,
+        'loai': loai,
+        'soTien': soTien,
+        'phuongThuc': phuongThuc,
+        'trangThai': trangThai,
+        'ngayTao': ngayTao,
+        'moTa': moTa,
+        'maVe': maVe,
+      };
+
+  factory GiaoDich.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return GiaoDich(
+      id: doc.id,
+      userId: d['userId'] ?? '',
+      loai: d['loai'] ?? 'nap',
+      soTien: (d['soTien'] as num?)?.toDouble() ?? 0.0,
+      phuongThuc: d['phuongThuc'] ?? '',
+      trangThai: d['trangThai'] ?? 'dang_xu_ly',
+      ngayTao: d['ngayTao'] ?? '',
+      moTa: d['moTa'] ?? '',
+      maVe: d['maVe'],
+    );
+  }
+}
+
+class GoiNap {
+  final String? id;
+  final double soTien;
+  final String tieuDe;
+  final String? ghiChu;
+  final bool hoatDong;
+
+  const GoiNap({
+    this.id,
+    required this.soTien,
+    required this.tieuDe,
+    this.ghiChu,
+    this.hoatDong = true,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'soTien': soTien,
+        'tieuDe': tieuDe,
+        'ghiChu': ghiChu,
+        'hoatDong': hoatDong,
+      };
+
+  factory GoiNap.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return GoiNap(
+      id: doc.id,
+      soTien: (d['soTien'] as num?)?.toDouble() ?? 0.0,
+      tieuDe: d['tieuDe'] ?? '',
+      ghiChu: d['ghiChu'],
+      hoatDong: d['hoatDong'] == true,
+    );
+  }
+}
+
+class PhuongThucThanhToan {
+  final String? id;
+  final String userId;
+  final String loai; // 'the_ngan_hang', 'tk_ngan_hang', 'momo', 'zalopay', 'vnpay'
+  final String tenPhuongThuc;
+  final String soThe; // Last 4 digits
+  final bool macDinh;
+  final String ngayTao;
+
+  const PhuongThucThanhToan({
+    this.id,
+    required this.userId,
+    required this.loai,
+    required this.tenPhuongThuc,
+    required this.soThe,
+    this.macDinh = false,
+    required this.ngayTao,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId,
+        'loai': loai,
+        'tenPhuongThuc': tenPhuongThuc,
+        'soThe': soThe,
+        'macDinh': macDinh,
+        'ngayTao': ngayTao,
+      };
+
+  factory PhuongThucThanhToan.fromDoc(DocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    return PhuongThucThanhToan(
+      id: doc.id,
+      userId: d['userId'] ?? '',
+      loai: d['loai'] ?? '',
+      tenPhuongThuc: d['tenPhuongThuc'] ?? '',
+      soThe: d['soThe'] ?? '',
+      macDinh: d['macDinh'] == true,
+      ngayTao: d['ngayTao'] ?? '',
     );
   }
 }
@@ -1063,6 +1196,182 @@ class TrangThaiUngDung extends ChangeNotifier {
           )
         : v).toList();
     notifyListeners();
+  }
+
+  // ---------- VI DIEN TU (WALLET) ----------
+
+  CollectionReference get _giaoDich => _db.collection('giao_dich');
+  CollectionReference get _goiNap => _db.collection('goi_nap');
+  CollectionReference get _phuongThucThanhToan => _db.collection('phuong_thuc_thanh_toan');
+
+  /// Cap nhat so du vi
+  Future<void> capNhatSoDuVi(String userId, double soTienMoi) async {
+    await _nguoiDung.doc(userId).update({'sotien': soTienMoi});
+  }
+
+  /// Lay so du vi hien tai
+  Future<double> laySoDuVi(String userId) async {
+    final doc = await _nguoiDung.doc(userId).get();
+    if (!doc.exists) return 0.0;
+    final data = doc.data() as Map<String, dynamic>;
+    return (data['sotien'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  /// Tao giao dich nap tien
+  Future<String> taoGiaoDichNap({
+    required String userId,
+    required double soTien,
+    required String phuongThuc,
+    required String moTa,
+  }) async {
+    final now = CoSoDuLieu.dinhDangNgayHienTai();
+    final ref = await _giaoDich.add({
+      'userId': userId,
+      'loai': 'nap',
+      'soTien': soTien,
+      'phuongThuc': phuongThuc,
+      'trangThai': 'dang_xu_ly',
+      'ngayTao': now,
+      'moTa': moTa,
+    });
+    return ref.id;
+  }
+
+  /// Cap nhat trang thai giao dich
+  Future<void> capNhatTrangThaiGiaoDich(String giaoDichId, String trangThai) async {
+    await _giaoDich.doc(giaoDichId).update({'trangThai': trangThai});
+  }
+
+  /// Nap tien (giao dich va cap nhat so du)
+  Future<bool> napTien({
+    required String userId,
+    required double soTien,
+    required String phuongThuc,
+    required String moTa,
+  }) async {
+    try {
+      // Tao giao dich
+      final giaoDichId = await taoGiaoDichNap(
+        userId: userId,
+        soTien: soTien,
+        phuongThuc: phuongThuc,
+        moTa: moTa,
+      );
+
+      // Gia lap: giao dich thanh cong
+      await capNhatTrangThaiGiaoDich(giaoDichId, 'thanh_cong');
+
+      // Cap nhat so du
+      final soDuHienTai = await laySoDuVi(userId);
+      final soDuMoi = soDuHienTai + soTien;
+      await capNhatSoDuVi(userId, soDuMoi);
+
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Thanh toan ve bang vi
+  Future<bool> thanhToanVeBangVi({
+    required String userId,
+    required String maVe,
+    required double soTien,
+  }) async {
+    try {
+      final soDuHienTai = await laySoDuVi(userId);
+      if (soDuHienTai < soTien) return false; // Khong du tien
+
+      // Tao giao dich
+      final now = CoSoDuLieu.dinhDangNgayHienTai();
+      await _giaoDich.add({
+        'userId': userId,
+        'loai': 'thanh_toan',
+        'soTien': soTien,
+        'phuongThuc': 'vi',
+        'trangThai': 'thanh_cong',
+        'ngayTao': now,
+        'moTa': 'Thanh toan ve xe',
+        'maVe': maVe,
+      });
+
+      // Tru so du
+      final soDuMoi = soDuHienTai - soTien;
+      await capNhatSoDuVi(userId, soDuMoi);
+
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Hoan tien (khi huy ve)
+  Future<bool> hoanTien({
+    required String userId,
+    required String maVe,
+    required double soTien,
+    required String lyDo,
+  }) async {
+    try {
+      // Tao giao dich
+      final now = CoSoDuLieu.dinhDangNgayHienTai();
+      await _giaoDich.add({
+        'userId': userId,
+        'loai': 'hoan_tien',
+        'soTien': soTien,
+        'phuongThuc': 'vi',
+        'trangThai': 'thanh_cong',
+        'ngayTao': now,
+        'moTa': 'Hoan tien: $lyDo',
+        'maVe': maVe,
+      });
+
+      // Cong so du
+      final soDuHienTai = await laySoDuVi(userId);
+      final soDuMoi = soDuHienTai + soTien;
+      await capNhatSoDuVi(userId, soDuMoi);
+
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Lay danh sach giao dich cua nguoi dung
+  Future<List<GiaoDich>> layDanhSachGiaoDich(String userId) async {
+    final q = await _giaoDich
+        .where('userId', isEqualTo: userId)
+        .orderBy('ngayTao', descending: true)
+        .get();
+    return q.docs.map((doc) => GiaoDich.fromDoc(doc)).toList();
+  }
+
+  /// Tao goi nap mac dinh (chay 1 lan)
+  Future<void> taoGoiNapMacDinh() async {
+    final existing = await _goiNap.limit(1).get();
+    if (existing.docs.isNotEmpty) return;
+
+    final goiList = [
+      {'soTien': 100000.0, 'tieuDe': '100.000đ', 'ghiChu': null},
+      {'soTien': 200000.0, 'tieuDe': '200.000đ', 'ghiChu': null},
+      {'soTien': 500000.0, 'tieuDe': '500.000đ', 'ghiChu': null},
+      {'soTien': 1000000.0, 'tieuDe': '1.000.000đ', 'ghiChu': null},
+    ];
+
+    for (final goi in goiList) {
+      await _goiNap.add({
+        'soTien': goi['soTien'],
+        'tieuDe': goi['tieuDe'],
+        'ghiChu': goi['ghiChu'],
+        'hoatDong': true,
+      });
+    }
+  }
+
+  /// Lay danh sach goi nap hoat dong
+  Future<List<GoiNap>> layGoiNapHoatDong() async {
+    final q = await _goiNap.where('hoatDong', isEqualTo: true).get();
+    return q.docs.map((doc) => GoiNap.fromDoc(doc)).toList();
   }
 
   // -------- OTP (simulated - dùng trong bộ nhớ) --------

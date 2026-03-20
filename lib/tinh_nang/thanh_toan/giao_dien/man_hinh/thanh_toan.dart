@@ -95,6 +95,7 @@ class _ThanhToanState extends State<ThanhToan> {
     }
   }
   final List<Map<String, dynamic>> _phuongThuc = [
+    {'ten': 'Ví điện tử', 'bieu': CupertinoIcons.wallet_pass},
     {'ten': 'Ví điện tử (MoMo)', 'bieu': CupertinoIcons.device_phone_portrait},
     {'ten': 'Chuyển khoản ngân hàng', 'bieu': CupertinoIcons.building_2_fill},
     {'ten': 'Tiền mặt tại xe', 'bieu': CupertinoIcons.money_dollar_circle},
@@ -129,8 +130,35 @@ class _ThanhToanState extends State<ThanhToan> {
       return;
     }
 
+    // Neu chon thanh toan bang vi: kiem tra so du
+    if (_ptThanhToan == 0) {
+      final nd = TrangThaiUngDung().nguoiDungHienTai;
+      if (nd == null) return;
+      
+      final soDuVi = nd.sotien;
+      if (soDuVi < _giaThucTe) {
+        showCupertinoDialog(
+          context: context,
+          builder: (_) => CupertinoAlertDialog(
+            title: const Text('Số dư không đủ'),
+            content: Text(
+              'Số dư ví của bạn là ${(soDuVi / 1000).toStringAsFixed(0)}k\n'
+              'Vui lòng nạp thêm tiền vào ví hoặc chọn phương thức thanh toán khác.',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
     // MoMo hoặc chuyển khoản → hiện hướng dẫn thanh toán trước
-    if (_ptThanhToan == 0 || _ptThanhToan == 1) {
+    if (_ptThanhToan == 1 || _ptThanhToan == 2) {
       final xacNhan = await _hienThiHuongDanThanhToan();
       if (!xacNhan || !mounted) return;
     }
@@ -157,6 +185,21 @@ class _ThanhToanState extends State<ThanhToan> {
         );
         final veDaLuu = await db.datVe(ve);
         TrangThaiUngDung().themVeLocal(veDaLuu);
+        
+        // Neu thanh toan bang vi: tru so du
+        if (_ptThanhToan == 0) {
+          await db.thanhToanVeBangVi(
+            userId: TrangThaiUngDung().nguoiDungHienTai!.id!,
+            maVe: ve.maVe,
+            soTien: _giaThucTe.toDouble(),
+          );
+          // Cap nhat trang thai ung dung
+          final soDuMoi = await db.laySoDuVi(TrangThaiUngDung().nguoiDungHienTai!.id!);
+          TrangThaiUngDung().capNhatNguoiDung(
+            TrangThaiUngDung().nguoiDungHienTai!.copyWith(sotien: soDuMoi),
+          );
+        }
+        
         // Nếu có khuyến mãi thì tăng bộ đếm lượt sử dụng.
         if (_kmApDung != null) {
           await db.tangDaSuDungKhuyenMai(_kmApDung!.id!);
@@ -171,7 +214,7 @@ class _ThanhToanState extends State<ThanhToan> {
 
   Future<bool> _hienThiHuongDanThanhToan() async {
     // Popup hướng dẫn quét QR theo phương thức thanh toán đã chọn.
-    final laMoMo = _ptThanhToan == 0;
+    final laMoMo = _ptThanhToan == 1;
     final maGiaoDich = 'BOOKBUS${DateTime.now().millisecondsSinceEpoch % 1000000}';
     const sdtMoMo = '0901234567';
     const stk = '1028824828';

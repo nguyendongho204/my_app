@@ -567,7 +567,11 @@ class _VeCuaToiState extends State<VeCuaToi> {
       context: context,
       builder: (_) => CupertinoAlertDialog(
         title: const Text('Hủy vé?'),
-        content: Text('Bạn chắc chắn muốn hủy vé ${ve.maVe}?\nHành động này không thể hoàn tác.'),
+        content: Text(
+          'Bạn chắc chắn muốn hủy vé ${ve.maVe}?\n'
+          'Hành động này không thể hoàn tác.\n\n'
+          'Số tiền ${ve.tongTien} đ sẽ được hoàn lại vào ví.',
+        ),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
@@ -579,6 +583,23 @@ class _VeCuaToiState extends State<VeCuaToi> {
               Navigator.of(context, rootNavigator: true).pop();
               TrangThaiUngDung().huyVeLocal(ve.id!);
               await CoSoDuLieu().huyVe(ve.id!);
+              
+              // Hoàn tiền vào ví
+              if (TrangThaiUngDung().daDangNhap) {
+                final userId = TrangThaiUngDung().nguoiDungHienTai!.id!;
+                await CoSoDuLieu().hoanTien(
+                  userId: userId,
+                  maVe: ve.maVe,
+                  soTien: ve.tongTien.toDouble(),
+                  lyDo: 'Người dùng hủy vé',
+                );
+                
+                // Cập nhật số dư ví
+                final soDuMoi = await CoSoDuLieu().laySoDuVi(userId);
+                TrangThaiUngDung().capNhatNguoiDung(
+                  TrangThaiUngDung().nguoiDungHienTai!.copyWith(sotien: soDuMoi),
+                );
+              }
             },
             child: const Text('Hủy vé'),
           ),
