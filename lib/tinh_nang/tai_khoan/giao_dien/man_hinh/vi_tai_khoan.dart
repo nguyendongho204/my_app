@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
+import '../../../../cau_hinh/hang_so.dart';
 import '../../../../du_lieu/co_so_du_lieu.dart';
-import '../../../../tinh_nang/dang_nhap/model/nguoi_dung_model.dart';
+import '../../../../widget_dung_chung/cac_widget.dart';
 
 class ViTaiKhoan extends StatefulWidget {
   const ViTaiKhoan({Key? key}) : super(key: key);
@@ -33,7 +33,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
   }
 
   Future<void> _taiGiaoDich() async {
-    final user = context.read<NguoiDungModel>().nguoiDung;
+    final user = TrangThaiUngDung().nguoiDungHienTai;
     if (user != null) {
       final gd = await _db.layDanhSachGiaoDich(user.id!);
       setState(() => _danhSachGiaoDich = gd);
@@ -49,7 +49,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
     setState(() => _dangXuLy = true);
 
     try {
-      final user = context.read<NguoiDungModel>().nguoiDung;
+      final user = TrangThaiUngDung().nguoiDungHienTai;
       if (user == null) return;
 
       final success = await _db.napTien(
@@ -63,6 +63,9 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
         _thongBao('Nạp tiền thành công!');
         _soTienController.clear();
         await _taiGiaoDich();
+        // Update balance in state
+        final soDuMoi = await _db.laySoDuVi(user.id!);
+        TrangThaiUngDung().capNhatNguoiDung(user.copyWith(sotien: soDuMoi));
       } else {
         _thongBao('Nạp tiền thất bại. Vui lòng thử lại');
       }
@@ -105,26 +108,36 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ví Điện Tử'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ---------- CARD SO DU ----------
-            _buildCardSoDu(),
-            const SizedBox(height: 24),
-
-            // ---------- NAP TIEN ----------
-            _buildSectionNapTien(),
-            const SizedBox(height: 24),
-
-            // ---------- GIAO DICH GAN DAY ----------
-            _buildSectionGiaoDich(),
+    return CupertinoPageScaffold(
+      backgroundColor: mauNenToi,
+      child: Container(
+        decoration: const BoxDecoration(gradient: gradientNen),
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              backgroundColor: mauNenToi2.withAlpha(230),
+              border: null,
+              largeTitle: const Text(
+                'Ví Điện Tử',
+                style: TextStyle(color: mauTextTrang),
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCardSoDu(),
+                    const SizedBox(height: 24),
+                    _buildSectionNapTien(),
+                    const SizedBox(height: 24),
+                    _buildSectionGiaoDich(),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -132,56 +145,51 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
   }
 
   Widget _buildCardSoDu() {
-    return Consumer<NguoiDungModel>(
-      builder: (context, model, _) {
-        final soDu = model.nguoiDung?.sotien ?? 0.0;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+    final soDu = TrangThaiUngDung().nguoiDungHienTai?.sotien ?? 0.0;
+    return Container(
+      decoration: BoxDecoration(
+        color: mauCardNen,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: mauCardVien),
+        boxShadow: [
+          BoxShadow(
+            color: mauXanhChinh.withAlpha(25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Số dư ví',
+            style: TextStyle(
+              color: mauTextXam,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.purple.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Số dư ví',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${_dinhDangTien(soDu)}đ',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${soDu.toStringAsFixed(0).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',')} đ',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          Text(
+            '${_dinhDangTien(soDu)}đ',
+            style: const TextStyle(
+              color: mauTextTrang,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Text(
+            '${soDu.toStringAsFixed(0).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',')} đ',
+            style: const TextStyle(
+              color: mauTextXam,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -191,7 +199,11 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
       children: [
         const Text(
           'Nạp tiền nhanh',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: mauTextTrang,
+          ),
         ),
         const SizedBox(height: 12),
         GridView.count(
@@ -205,67 +217,52 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
               .toList(),
         ),
         const SizedBox(height: 16),
-
-        // ---------- NAP TUY CHON ----------
         const Text(
           'Nhập số tiền tùy chọn',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: mauTextTrang,
+          ),
         ),
         const SizedBox(height: 12),
-        TextField(
+        CupertinoTextField(
           controller: _soTienController,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'Nhập số tiền...',
-            prefixIcon: const Icon(Icons.attach_money),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          placeholder: 'Nhập số tiền...',
+          placeholderStyle: const TextStyle(color: mauTextXam),
+          style: const TextStyle(color: mauTextTrang),
+          prefix: const Padding(
+            padding: EdgeInsets.fromLTRB(8, 0, 4, 0),
+            child: Text('đ', style: TextStyle(color: mauTextXam)),
+          ),
+          decoration: BoxDecoration(
+            color: mauNenToi,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: mauCardVien),
           ),
         ),
         const SizedBox(height: 16),
-
-        // ---------- CHON PHUONG THUC ----------
         const Text(
           'Phương thức nạp tiền',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: mauTextTrang,
+          ),
         ),
         const SizedBox(height: 12),
         _buildPhuongThucThanhToan(),
         const SizedBox(height: 20),
-
-        // ---------- NUT NAP TIEN ----------
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: _dangXuLy
-                ? null
-                : () {
-                    final soTien = double.tryParse(_soTienController.text) ?? 0;
-                    _napTien(soTien);
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: _dangXuLy
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Text(
-                    'Nạp tiền',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-          ),
+        NutGradient(
+          nhanDe: _dangXuLy ? 'Đang xử lý...' : 'Nạp tiền',
+          chieuRong: double.infinity,
+          onNhan: _dangXuLy
+              ? null
+              : () {
+                  final soTien = double.tryParse(_soTienController.text) ?? 0;
+                  _napTien(soTien);
+                },
         ),
       ],
     );
@@ -276,7 +273,8 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
       onTap: () => _napTien(soTien),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          color: mauCardNen,
+          border: Border.all(color: mauCardVien),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -287,6 +285,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: mauTextTrang,
               ),
             ),
             const SizedBox(height: 8),
@@ -294,7 +293,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
               'Nạp ngay',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: mauTextXam,
               ),
             ),
           ],
@@ -321,12 +320,12 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: _phuongThucChon == pt['id']
-                        ? Colors.blue
-                        : Colors.grey.shade100,
+                        ? mauXanhChinh
+                        : mauCardNen,
                     border: Border.all(
                       color: _phuongThucChon == pt['id']
-                          ? Colors.blue
-                          : Colors.grey.shade300,
+                          ? mauXanhSang
+                          : mauCardVien,
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -342,8 +341,8 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
                         pt['ten']!,
                         style: TextStyle(
                           color: _phuongThucChon == pt['id']
-                              ? Colors.white
-                              : Colors.black,
+                              ? mauTextTrang
+                              : mauTextXam,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -361,7 +360,11 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
       children: [
         const Text(
           'Lịch sử giao dịch',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: mauTextTrang,
+          ),
         ),
         const SizedBox(height: 12),
         if (_danhSachGiaoDich.isEmpty)
@@ -370,7 +373,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
             alignment: Alignment.center,
             child: const Text(
               'Chưa có giao dịch nào',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: mauTextXam),
             ),
           )
         else
@@ -389,9 +392,8 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
 
   Widget _buildItemGiaoDich(GiaoDich gd) {
     final iamount = gd.loai == 'nap' || gd.loai == 'hoan_tien' ? '+' : '-';
-    final color = gd.loai == 'nap' || gd.loai == 'hoan_tien'
-        ? Colors.green
-        : Colors.red;
+    final isPositive = gd.loai == 'nap' || gd.loai == 'hoan_tien';
+    final color = isPositive ? mauXanhLa : mauDoHong;
 
     final tenLoai = gd.loai == 'nap'
         ? 'Nạp tiền'
@@ -403,9 +405,9 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        color: mauCardNen,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: mauCardVien),
       ),
       child: Row(
         children: [
@@ -413,7 +415,7 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(25),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -433,12 +435,13 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
+                    color: mauTextTrang,
                   ),
                 ),
                 Text(
                   gd.ngayTao,
                   style: const TextStyle(
-                    color: Colors.grey,
+                    color: mauTextXam,
                     fontSize: 12,
                   ),
                 ),
@@ -461,10 +464,10 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: gd.trangThai == 'thanh_cong'
-                      ? Colors.green.shade100
+                      ? mauXanhLa.withAlpha(25)
                       : gd.trangThai == 'that_bai'
-                          ? Colors.red.shade100
-                          : Colors.orange.shade100,
+                          ? mauDoHong.withAlpha(25)
+                          : mauCam.withAlpha(25),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -476,10 +479,10 @@ class _ViTaiKhoanState extends State<ViTaiKhoan> {
                   style: TextStyle(
                     fontSize: 10,
                     color: gd.trangThai == 'thanh_cong'
-                        ? Colors.green
+                        ? mauXanhLa
                         : gd.trangThai == 'that_bai'
-                            ? Colors.red
-                            : Colors.orange,
+                            ? mauDoHong
+                            : mauCam,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
