@@ -35,10 +35,10 @@ class _ThongBaoGiongNoi {
   static const nutDaHieu = 'Đã hiểu';
 
   static const nhanDangNghe = 'ĐANG NGHE';
-  static const nhanGiongNoi = 'GIONG NOI';
-  static const moTaNhanLaiDeDung = 'Nhan lai de dung ghi am';
+  static const nhanGiongNoi = 'GIỌNG NÓI';
+  static const moTaNhanLaiDeDung = 'nhấn lại để dùng giọng nói';
   static const moTaNhanDeTimBangGiongNoi =
-      'Nhan de tim chuyen bang giong noi';
+      'Nhấn để tìm chuyến bằng giọng nói';
 }
 
 class TimTuyenGiongNoiService {

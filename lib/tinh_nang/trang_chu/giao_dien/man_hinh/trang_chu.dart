@@ -596,9 +596,9 @@ class _TimNhanhHome extends StatelessWidget {
 
 class _TuyenPhoBien extends StatelessWidget {
   static const _danhSach = [
-    {'di': 'BX Ninh Kiều', 'den': 'BX Bình Thủy', 'gio': '06:00', 'gia': '15.000đ', 'xe': 'Xe buýt số 01'},
-    {'di': 'BX Ninh Kiều', 'den': 'BX Cái Răng', 'gio': '06:30', 'gia': '12.000đ', 'xe': 'Xe buýt số 03'},
-    {'di': 'BX Ô Môn', 'den': 'BX Ninh Kiều', 'gio': '07:00', 'gia': '18.000đ', 'xe': 'Xe buýt số 05'},
+    {'di': 'BX Ninh Kiều', 'den': 'BX Bình Thủy', 'gio': '06:30', 'gia': '15.000đ', 'xe': 'Xe buýt số 01'},
+    {'di': 'BX Ninh Kiều', 'den': 'BX Cái Răng', 'gio': '08:30', 'gia': '12.000đ', 'xe': 'Xe buýt số 03'},
+    {'di': 'BX Ô Môn', 'den': 'BX Ninh Kiều', 'gio': '10:30', 'gia': '18.000đ', 'xe': 'Xe buýt số 05'},
   ];
 
   final void Function(String di, String den) onChon;

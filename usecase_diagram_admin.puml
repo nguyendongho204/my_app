@@ -1,0 +1,50 @@
+@startuml Biểu đồ Use Case - Admin
+
+skinparam fontSize 11
+skinparam linetype ortho
+
+left to right direction
+
+' ===== ACTOR =====
+actor "Admin" as Admin
+
+' ===== SYSTEM BOUNDARY =====
+rectangle "Quản lý hệ thống" {
+
+    usecase "Đăng nhập" as UC2
+    
+    usecase "Tạo tuyến xe" as UC8
+    usecase "Tạo lịch chạy" as UC9
+    usecase "Quản lý xe" as UC10
+    usecase "Quản lý tài xế" as UC11
+    usecase "Gán xe & tài xế" as UC12
+    usecase "Quản lý khuyến mại" as UC13
+    usecase "Xem danh sách vé" as UC14
+    usecase "Xử lý khiếu nại" as UC15
+
+    ' ===== LOGIN PREREQUISITE =====
+    UC8 ..|> UC2
+    UC9 ..|> UC2
+    UC10 ..|> UC2
+    UC11 ..|> UC2
+    UC13 ..|> UC2
+    UC14 ..|> UC2
+    UC15 ..|> UC2
+    
+    ' ===== BUSINESS FLOWS =====
+    UC8 ..|> UC9
+    UC9 ..|> UC12
+    UC10 ..|> UC12
+    UC11 ..|> UC12
+}
+
+' ===== ACTOR ASSOCIATIONS =====
+Admin --> UC2
+Admin --> UC8
+Admin --> UC10
+Admin --> UC11
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+
+@enduml

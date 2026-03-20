@@ -80,8 +80,8 @@ Future<void> _taoSeedData() async {
   if (lichHomNay.isEmpty) {
     final tuyenList = await db.layTatCaTuyen();
     if (tuyenList.isNotEmpty) {
-      final gioList = ['07:00', '09:30', '13:00', '15:30'];
-      final soGheList = [16, 16, 16, 16];
+      final gioList = ['06:30', '08:30', '10:30', '12:30', '14:30', '16:30', '18:30', '20:30', '22:30'];
+      final soGheList = [16, 16, 16, 16, 16, 16, 16, 16, 16];
       for (int i = 0; i < tuyenList.length && i < 3; i++) {
         final t = tuyenList[i];
         for (int j = 0; j < gioList.length; j++) {

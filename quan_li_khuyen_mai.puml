@@ -1,0 +1,37 @@
+@startuml Biểu đồ Use Case - Quản lý khuyến mại
+
+skinparam fontSize 11
+skinparam linetype ortho
+
+left to right direction
+
+' ===== ACTOR =====
+actor "Admin" as Admin
+
+' ===== SYSTEM BOUNDARY =====
+rectangle "Quản lý khuyến mại" {
+
+    usecase "Đăng nhập" as UC1
+    usecase "Tạo khuyến mại" as UC2
+    usecase "Chỉnh sửa khuyến mại" as UC3
+    usecase "Xóa khuyến mại" as UC4
+    usecase "Xem danh sách khuyến mại" as UC5
+    usecase "Kích hoạt/Tắt khuyến mại" as UC6
+
+    ' ===== LOGIN PREREQUISITE =====
+    UC2 ..|> UC1
+    UC3 ..|> UC1
+    UC4 ..|> UC1
+    UC5 ..|> UC1
+    UC6 ..|> UC1
+}
+
+' ===== ACTOR ASSOCIATIONS =====
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+
+@enduml
